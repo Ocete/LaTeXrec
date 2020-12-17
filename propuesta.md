@@ -2,21 +2,19 @@
 
 El modelo que proponemos es el siguiente:
 
-- un codificador, formado por una red convolucional, seguido por
-  un modelo transformer,
+- un codificador, formado por una red convolucional, seguido por un modelo
+  transformer,
 
-- un decodificador transformer, que emplea atención multi-cabezal
-  sobre la salida del codificador y sobre una secuencia
-  potencialmente incompleta, para predecir el siguiente token de
-  la fórmula. Es decir, es un modelo de lenguaje condicional que
-  modela `p(x_t | V, x_1, ..., x_{t-1})`, donde `V` es la salida del
-  codificador.
+- un decodificador transformer, que emplea atención multi-cabezal sobre la
+  salida del codificador y sobre una secuencia potencialmente incompleta, para
+  predecir el siguiente token de la fórmula. Es decir, es un modelo de lenguaje
+  condicional que modela `p(x_t | V, x_1, ..., x_{t-1})`, donde `V` es la salida
+  del codificador.
 
 # Bases de datos
 
 Las bases de datos para el problema son:
 
-- [TODO: FALTA INSERTAR LA DE 65K]
 - im2latex-100k: https://zenodo.org/record/56198#.V2px0jXT6eA
 - imlatex-170k: https://www.kaggle.com/rvente/im2latex170k
 
