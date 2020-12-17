@@ -16,7 +16,8 @@ El modelo que proponemos es el siguiente:
 Las bases de datos para el problema son:
 
 - [im2latex-100k](https://zenodo.org/record/56198#.V2px0jXT6eA)
-- [imlatex-170k](https://www.kaggle.com/rvente/im2latex170k)
+- [imlatex-170k](https://www.kaggle.com/rvente/im2latex170k): contiene 65000
+  ejemplos, que se añaden a los 100000 de im2latex-100k.
 
 # Modelo inicial propuesto
 
@@ -36,53 +37,53 @@ mismo.
 
 # Vías de trabajo
 
-Dividiremos este trabajo en dos etapas. En la primera la base de datos 
-elegida queda fijada e iteramos sobre los datos y el modelo para
-mejorarlo todo lo posible. 
+Dividiremos este trabajo en dos etapas. En la primera la base de datos elegida
+queda fijada e iteramos sobre los datos y el modelo para mejorarlo todo lo
+posible.
 
-En la segunda, aplicamos el modelo obtenido a una nueva base de datos,
-buscando ver cuánto hemos podido generalizar. Buscaremos reajustar 
-el modelo para adecuarlo a este conjunto de datos mayor.
+En la segunda, aplicamos el modelo obtenido a una nueva base de datos, buscando
+ver cuánto hemos podido generalizar. Buscaremos reajustar el modelo para
+adecuarlo a este conjunto de datos mayor.
 
 A continuación proponemos de forma ordenada las vías de trabajo que
 seguiremos durante la primera etapa:
 
-1. Eliminar ambigüedades en los datos de training: En este tipo
-   de problemas encontramos ambigüedad en la salida de los datos.
-   En particular, la misma expresión puede escribirse de distintas
-   formar lo que hace que su predicción exacta sea mucho más
-   complicada. Regularizaremos los datos de training para que la
-   salida esperada sea lo más simple posible, sin cambiar el
-   significado de la misma.
+1. Eliminar ambigüedades en los datos de entrenamiento: en este problema
+   encontramos ambigüedad en la salida de los datos. Distintas expresiones LaTeX
+   pueden generar la misma salida o una casi indistiguible en la imagen: por
+   ejemplo, `\sin` y `\operatorname{sin}`. Esto hace que el aprendizaje sea
+   mucho más difícil. Normalizaremos los datos de entrenamiento para que la
+   salida esperada sea lo más simple posible, sin cambiar el significado de la
+   misma.
 
-2. Estudiaremos al posibildiad de utilizar otras métricas distintas
-   a la mera comparación elemento a elemento con el objetivo de evaluar
-   la cercanía entre la predicción y la salida esperada. Por ejemplo,
-   si la salida esperada es `[ sin , x ]`, las predicciones `[ sin, y ]`
-   y `[a, +,  b, =, c ]` son ambas incorrectas, pero la primera es
-   más cercana a ser correcta.
+2. Estudiaremos la posibilidad de utilizar otras métricas distintas a la mera
+   comparación elemento a elemento (por ejemplo,
+   [BLEU](https://en.wikipedia.org/wiki/BLEU)) con el objetivo de evaluar la
+   cercanía entre la predicción y la salida esperada. Por ejemplo, si la salida
+   esperada es `[sin , x]`, las predicciones `[y, \sin]` y `[a, +, b, =, c ]`
+   son ambas incorrectas, pero la primera es más cercana a ser correcta.
 
 3. El cuello de botella del modelo actual es el consumo de memoria de 
    la atención multi-cabezal. Para paliar este hecho se estudiarán
    dos alternativas:
    
-  3.1. Implementar alguna de las soluciones que se han propuesto para
-       reducir dicho consumo de memoria [4]. 
-  3.2. Si esto no fuera posible o viable, estudiaríamos cómo reducir
-       la salida de nuestra CNN para que la entrada del codificador
-       sea reducida. Al mismo tiempo estaríamos compactando la
-       información extraido por la CNN, lo que puede acabar
-       obteniendo peores resultados. Es por ello que evitaremos esta
-       opción en la medida de lo posible.
+  - 3.1. Implementar alguna de las
+       [soluciones](https://arxiv.org/abs/2009.06732) que se han propuesto para
+       reducir dicho consumo de memoria.
+	   
+  - 3.2. Si esto no fuera posible o viable, estudiaríamos cómo reducir la salida
+       de nuestra CNN para que la entrada del codificador sea reducida. Al mismo
+       tiempo estaríamos compactando la información extraido por la CNN, lo que
+       puede acabar obteniendo peores resultados. Por ello, puede ser preferible
+       la primera opción.
   
 4. Evaluaremos distintas arquitecturas para la red convolucional del
-   codificador. Esta red se puede preentrenar de forma auto
-   supervisada como se hace con un autoencoder. Del mismo modo
-   buscaremos si es posible alguna red preexistente de este tipo para
-   realizar fine tunning sobre la misma.
+   codificador. Esta red se puede preentrenar de forma auto supervisada como se
+   hace con un autoencoder. Del mismo modo buscaremos si es posible alguna red
+   preexistente de este tipo para realizar un ajuste fino sobre la misma.
 
-5. Ajustaremos los hiperparámetros de la arquitectura (número de
-  capas, cabezales, tamaño de la representación, tasas de dropout).
+5. Ajustaremos los hiperparámetros de la arquitectura (número de capas,
+  cabezales, tamaño de la representación, tasas de *dropout*).
 
 6. Estudiaremos la posibilidad de añadir BN a las capas intermedias
    del transformer.
