@@ -20,17 +20,19 @@ Las bases de datos para el problema son:
 
 # Modelo inicial propuesto
 
-El modelo inicial utiliza una CCN [TODO: COMPLETAR] para obtener
-las características de las imágenes de entrada en un vector de
-entrada para el modelo codificador - decodificador.
+El modelo inicial utiliza una red convolucional [TODO: COMPLETAR] para obtener
+las características de las imágenes de entrada en un vector de entrada para el
+modelo codificador - decodificador.
 
-Utilizamos el [Tokenizer de TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer)
-para obtener el alfabeto de entrada. Por lo tanto, este no es
-fijo sino que depende de la entrada.
+Utilizamos el [*tokenizer* de
+TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer)
+para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
+depende del conjunto de datos.
 
-En cuanto a los datos, utilizamos 
-[TODO: completar con la base de datos utilizada + una explicación
-de por qué reducimos la entrada sobre las 65k si es que lo hacemos].
+En cuanto a los datos, utilizamos, comenzamos con los 65000 ejemplos de
+im2latex-170k. De ellos, nos quedamos con aquellos que tengan un tamaño que nos
+permita entrenar el modelo, debido a los requisitos de memoria del
+mismo.
 
 # Vías de trabajo
 
