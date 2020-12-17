@@ -15,8 +15,8 @@ El modelo que proponemos es el siguiente:
 
 Las bases de datos para el problema son:
 
-- im2latex-100k: https://zenodo.org/record/56198#.V2px0jXT6eA
-- imlatex-170k: https://www.kaggle.com/rvente/im2latex170k
+- [im2latex-100k](https://zenodo.org/record/56198#.V2px0jXT6eA)
+- [imlatex-170k](https://www.kaggle.com/rvente/im2latex170k)
 
 # Modelo inicial propuesto
 
