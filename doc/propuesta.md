@@ -11,9 +11,9 @@ reference-section-title: Referencias
 El modelo que proponemos es el siguiente:
 
 - un codificador, formado por una red convolucional, seguido por un modelo
-  transformer,
+  *transformer*,
 
-- un decodificador transformer, que emplea atención multi-cabezal sobre la
+- un decodificador *transformer*, que emplea atención multi-cabezal sobre la
   salida del codificador y sobre una secuencia potencialmente incompleta, para
   predecir el siguiente token de la fórmula. Es decir, es un modelo de lenguaje
   condicional que modela $p(x_t | V, x_1, ..., x_{t-1})$, donde $V$ es la salida
@@ -23,7 +23,7 @@ El modelo que proponemos es el siguiente:
 
 Las bases de datos para el problema son:
 
-- im2latex-100k (@kanervisto_anssi_2016_56198)
+- im2latex-100k (@kanervisto_anssi_2016_56198), y
 - imlatex-170k (@im2latex_170k): contiene 65000 ejemplos, que se añaden a los
   100000 de im2latex-100k.
 
