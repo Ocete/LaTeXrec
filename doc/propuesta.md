@@ -1,3 +1,10 @@
+---
+title: "Generación de LaTeX a partir de imágenes de fórmulas"
+subtitle: "Propuesta de proyecto final"
+author: "José Antonio Álvarez Ocete, Daniel Pozo Escalona"
+titlepage: true
+---
+
 # Modelo general
 
 El modelo que proponemos es el siguiente:
