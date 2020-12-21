@@ -1,4 +1,8 @@
 all: propuesta.pdf
 
-propuesta.pdf: propuesta.md
-	pandoc propuesta.md --template pandoc-latex-template/eisvogel.tex -o propuesta.pdf
+propuesta.pdf: propuesta.md bibliography.bib
+	pandoc propuesta.md \
+	--template pandoc-latex-template/eisvogel.tex \
+	--citeproc \
+	--bibliography bibliography.bib \
+	-o propuesta.pdf

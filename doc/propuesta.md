@@ -3,6 +3,7 @@ title: "Generación de LaTeX a partir de imágenes de fórmulas"
 subtitle: "Propuesta de proyecto final"
 author: "José Antonio Álvarez Ocete, Daniel Pozo Escalona"
 titlepage: true
+reference-section-title: Referencias
 ---
 
 # Modelo general
@@ -15,16 +16,16 @@ El modelo que proponemos es el siguiente:
 - un decodificador transformer, que emplea atención multi-cabezal sobre la
   salida del codificador y sobre una secuencia potencialmente incompleta, para
   predecir el siguiente token de la fórmula. Es decir, es un modelo de lenguaje
-  condicional que modela `p(x_t | V, x_1, ..., x_{t-1})`, donde `V` es la salida
+  condicional que modela $p(x_t | V, x_1, ..., x_{t-1})$, donde $V$ es la salida
   del codificador.
 
 # Bases de datos
 
 Las bases de datos para el problema son:
 
-- [im2latex-100k](https://zenodo.org/record/56198#.V2px0jXT6eA)
-- [imlatex-170k](https://www.kaggle.com/rvente/im2latex170k): contiene 65000
-  ejemplos, que se añaden a los 100000 de im2latex-100k.
+- im2latex-100k (@kanervisto_anssi_2016_56198)
+- imlatex-170k (@im2latex_170k): contiene 65000 ejemplos, que se añaden a los
+  100000 de im2latex-100k.
 
 # Modelo inicial propuesto
 
@@ -74,9 +75,8 @@ seguiremos durante la primera etapa:
    la atención multi-cabezal. Para paliar este hecho se estudiarán
    dos alternativas:
    
-  - 3.1. Implementar alguna de las
-       [soluciones](https://arxiv.org/abs/2009.06732) que se han propuesto para
-       reducir dicho consumo de memoria.
+  - 3.1. Implementar alguna de las soluciones (@tay2020efficient) que se han
+       propuesto para reducir dicho consumo de memoria.
 	   
   - 3.2. Si esto no fuera posible o viable, estudiaríamos cómo reducir la salida
        de nuestra CNN para que la entrada del codificador sea reducida. Al mismo
@@ -103,25 +103,18 @@ seguiremos durante la primera etapa:
     evaluación del modelo, para obtener secuencias a las que el
     modelo asigne la máxima probabilidad.
 
-# Referencias
+# Bibliografía
 
 Las referencias en las que nos inspiramos son fundamentalmente:
 
-- Image-to-Markup Generation with Coarse-to-Fine Attention [1]:
-  en este artículo se emplea un enfoque parecido al que
-  planteamos, pero se usan modelos recurrentes en lugar de
-  transformers.
+- @deng2017imagetomarkup: en este artículo se emplea un enfoque parecido al que
+  planteamos, pero se usan modelos recurrentes en lugar de transformers.
 
-- Transformer model for language understanding [2]: esta es una
-  guía de la documentación de Tensorflow en la que se implementa
-  un modelo codificador-decodificador con transformers. Es en la
-  que nos hemos basado para la implementación preliminar.
+- Transformer model for language understanding (@tensorflow_transformer): esta
+  es una guía de la documentación de Tensorflow en la que se implementa un
+  modelo codificador-decodificador con transformers. Es en la que nos hemos
+  basado para la implementación preliminar.
 
-- Transformers from scratch [3]: es una guía sobre la
-  arquitectura transformer que proporciona un buen entendimiento
-  de los mecanismos de atención.
-
-[1] https://arxiv.org/abs/1609.04938
-[2] https://www.tensorflow.org/tutorials/text/transformer
-[3] http://peterbloem.nl/blog/transformers
-[4] https://arxiv.org/abs/2009.06732
+- Transformers from scratch (@bloem_transformers): es una guía sobre la
+  arquitectura transformer que proporciona un buen entendimiento de los
+  mecanismos de atención.
