@@ -30,8 +30,8 @@ TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/te
 para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
 depende del conjunto de datos.
 
-En cuanto a los datos, utilizamos, comenzamos con los 65000 ejemplos de
-im2latex-170k. De ellos, nos quedamos con aquellos que tengan un tamaño que nos
+En cuanto a los datos, comenzamos con los 65000 ejemplos de im2latex-170k.
+De ellos, nos quedamos con aquellos que tengan un tamaño que nos
 permita entrenar el modelo, debido a los requisitos de memoria del
 mismo.
 
