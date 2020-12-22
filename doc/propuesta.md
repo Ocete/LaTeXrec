@@ -21,6 +21,9 @@ El modelo que proponemos es el siguiente:
   predecir el siguiente token de la fórmula. Es decir, es un modelo de lenguaje
   condicional que modela $p(x_t | V, x_1, ..., x_{t-1})$, donde $V$ es la salida
   del codificador.
+  
+Utiliza una red convolucional para obtener las características de las imágenes
+de entrada en un vector de entrada para el modelo codificador-decodificador.
 
 # Bases de datos
 
@@ -50,21 +53,6 @@ modelo, más que estas coincidan con unas prefijadas.
   \label{fig:muestras-1}
 \end{figure}
 
-# Modelo propuesto
-
-El modelo inicial utiliza una red convolucional [TODO: COMPLETAR] para obtener
-las características de las imágenes de entrada en un vector de entrada para el
-modelo codificador-decodificador.
-
-Utilizamos el [*tokenizer* de
-TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer)
-para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
-depende del conjunto de datos.
-
-En cuanto a los datos, comenzamos con los 65000 ejemplos de im2latex-170k.
-De ellos, nos quedamos con aquellos que tengan un tamaño que nos
-permita entrenar el modelo, debido a los requisitos de memoria del
-mismo.
 
 # Trabajo preliminar
 
@@ -94,14 +82,33 @@ o hiperparámetros de forma menos costosa.
   \label{fig:muestras-sintetica}
 \end{figure}
 
+## Procesamiento de los datos
+
+Para las imágenes, el procesamiento que realizamos es redimensionarlas a una
+altura común, manteniendo la relación de aspecto.
+
+Para las fórmulas, utilizamos el [*tokenizer* de
+TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer)
+para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
+depende del conjunto de datos. Esto nos permite codificar las fórmulas
+numéricamente.
+
+Tras esto, eliminamos los ejemplos con imágenes demasiado grandes para ser
+procesadas por el modelo, debido al coste cuadrático del mecanismo de atención.
+
 ## Evaluación de un modelo de referencia
 
 Hemos definido y evaluado un modelo de referencia, tanto en la base de datos
-sintética como en im2latex-170k.
+sintética como en im2latex-170k. Dicho modelo posee un codificador convolucional
+con tres capas Conv-BN-ELU-MaxPooling y una sola capa de atención en el
+codificador y en el decodificador.
 
 En la base de datos sintética, alcanza el 60 % de precisión en un conjunto de
 validación, lo que sugiere que la arquitectura puede ser adecuada para el
 problema.
+
+En 30.000 ejemplos de im2latex-170k, alcanza un 15 % de precisión en un conjunto
+de validación.
 
 \begin{figure}[h]
   \centering
@@ -169,11 +176,11 @@ seguiremos durante la primera etapa:
    la atención multi-cabezal. Para paliar este hecho se estudiarán
    dos alternativas:
    
-  - 3.1. Implementar alguna de las soluciones (@tay2020efficient) que se han
+   - Implementar alguna de las soluciones (@tay2020efficient) que se han
        propuesto para reducir dicho consumo de memoria.
 	   
-  - 3.2. Si esto no fuera posible o viable, estudiaríamos cómo reducir la salida
-       de nuestra CNN para que la entrada del codificador sea reducida. Al mismo
+   - Si esto no fuera posible o viable, estudiaríamos cómo reducir la salida de
+       nuestra CNN para que la entrada del codificador sea reducida. Al mismo
        tiempo estaríamos compactando la información extraido por la CNN, lo que
        puede acabar obteniendo peores resultados. Por ello, puede ser preferible
        la primera opción.
