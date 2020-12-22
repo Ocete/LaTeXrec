@@ -1,5 +1,5 @@
 ---
-title: "Generación de LaTeX a partir de imágenes de fórmulas"
+title: "Generación de \\LaTeX{} a partir de imágenes de fórmulas"
 subtitle: "Propuesta de proyecto final"
 author: "José Antonio Álvarez Ocete, Daniel Pozo Escalona"
 
@@ -40,7 +40,7 @@ pueden no ser directamente comparables. Esto lo paliaremos de dos formas: con la
 base de datos sintética que introducimos en la sección sobre el trabajo
 preliminar, y evaluando los modelos de referencia en la base de datos
 normalizada. Además, hay que tener en cuenta que lo relevante en este problema
-es dar expresiones $\LaTeX$ que produzcan las imágenes que se proporcionen al
+es dar expresiones \LaTeX{} que produzcan las imágenes que se proporcionen al
 modelo, más que estas coincidan con unas prefijadas.
 
 \begin{figure}[h]
@@ -162,7 +162,7 @@ seguiremos durante la primera etapa:
    comparación elemento a elemento (por ejemplo,
    [BLEU](https://en.wikipedia.org/wiki/BLEU)) con el objetivo de evaluar la
    cercanía entre la predicción y la salida esperada. Por ejemplo, si la salida
-   esperada es `[\sin , x]`, las predicciones `[y, \sin]` y `[a, +, b, =, c ]`
+   esperada es `[\sin , x]`, las predicciones `[y, \sin]` y `[a, +, b, =, c]`
    son ambas incorrectas, pero la primera es más cercana a ser correcta.
 
 3. El cuello de botella del modelo actual es el consumo de memoria de 
