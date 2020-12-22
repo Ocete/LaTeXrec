@@ -30,6 +30,19 @@ Las bases de datos para el problema son:
 - imlatex-170k (@im2latex_170k): contiene 65000 ejemplos, que se añaden a los
   100000 de im2latex-100k.
 
+Ambas bases de datos contienen ambigüedad en los ejemplos, en forma de fórmulas
+o segmentos de fórmulas que, escritos de distinta forma, producen la misma
+imagen. Dedicaremos parte del tiempo del proyecto a diseñar formas de
+normalizar estos datos, para mejorar los resultados.
+
+Por ello, las evaluaciones iniciales con modelos de referencia y las finales
+pueden no ser directamente comparables. Esto lo paliaremos de dos formas: con la
+base de datos sintética que introducimos en la sección sobre el trabajo
+preliminar, y evaluando los modelos de referencia en la base de datos
+normalizada. Además, hay que tener en cuenta que lo relevante en este problema
+es dar expresiones $\LaTeX$ que produzcan las imágenes que se proporcionen al
+modelo, más que estas coincidan con unas prefijadas.
+
 \begin{figure}[h]
   \centering
   \includegraphics{fig/ejemplo-im2latex.pdf}
@@ -85,6 +98,44 @@ o hiperparámetros de forma menos costosa.
 
 Hemos definido y evaluado un modelo de referencia, tanto en la base de datos
 sintética como en im2latex-170k.
+
+En la base de datos sintética, alcanza el 60 % de precisión en un conjunto de
+validación, lo que sugiere que la arquitectura puede ser adecuada para el
+problema.
+
+\begin{figure}[h]
+  \centering
+  
+  \subfloat{
+  \begin{modelblock}{Codificador convolucional}
+  Conv2D-BN-ELU(64 filtros) \\
+  MaxPooling2D(2$\times$2) \\
+  Conv2D-BN-ELU(64 filtros) \\
+  MaxPooling2D(2$\times$2) \\
+  Conv2D-BN-ELU(64 filtros) \\
+  MaxPooling2D(2$\times$2)
+  \end{modelblock}
+  }
+  \subfloat{
+  \begin{modelblock}{Codificador \textit{transformer}}
+  Codif. conv. \\
+  Codificación de posición \\
+  Dropout \\
+  Capa de codificador
+  \end{modelblock}
+  }
+  \subfloat{
+  \begin{modelblock}{Decodificador \textit{transformer}}
+  Embedding \\
+  Codificación de posición \\
+  Dropout \\
+  Capa de decodificador
+  \end{modelblock}
+  }
+  
+  \caption{Bloques del modelo de referencia.}
+  \label{fig:bloques-referencia}
+\end{figure}
 
 # Plan de trabajo
 
