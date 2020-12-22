@@ -2,8 +2,11 @@
 title: "Generación de LaTeX a partir de imágenes de fórmulas"
 subtitle: "Propuesta de proyecto final"
 author: "José Antonio Álvarez Ocete, Daniel Pozo Escalona"
+
 titlepage: true
 reference-section-title: Referencias
+graphics: true
+lang: es
 ---
 
 # Modelo general
@@ -27,11 +30,18 @@ Las bases de datos para el problema son:
 - imlatex-170k (@im2latex_170k): contiene 65000 ejemplos, que se añaden a los
   100000 de im2latex-100k.
 
-# Modelo inicial propuesto
+\begin{figure}[h]
+  \centering
+  \includegraphics{fig/ejemplo-im2latex.pdf}
+  \caption{Tres muestras de im2latex-170k.}
+  \label{fig:muestras-1}
+\end{figure}
+
+# Modelo propuesto
 
 El modelo inicial utiliza una red convolucional [TODO: COMPLETAR] para obtener
 las características de las imágenes de entrada en un vector de entrada para el
-modelo codificador - decodificador.
+modelo codificador-decodificador.
 
 Utilizamos el [*tokenizer* de
 TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer)
@@ -43,7 +53,36 @@ De ellos, nos quedamos con aquellos que tengan un tamaño que nos
 permita entrenar el modelo, debido a los requisitos de memoria del
 mismo.
 
-# Vías de trabajo
+# Trabajo preliminar
+
+Hemos realizado algún trabajo preliminar para motivar propuesta y comprobar que:
+
+- podemos implementar y ejecutar los modelos, y
+
+- estos pueden obtener resultados no despreciables en el problema.
+
+## Base de datos sintética
+
+Lo primero que hemos hecho ha sido crear una base de datos similar a las que
+pretendemos tratar, en la que las fórmulas han sido generadas a partir de una
+gramática relativamente sencilla, que contiene una cantidad pequeña de símbolos.
+
+Además, esta base de datos puede ser útil para evaluar cambios a la arquitectura
+o hiperparámetros de forma menos costosa.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics{fig/ejemplo-sintetica.pdf}
+  \caption{Muestras de la base de datos sintética.}
+  \label{fig:muestras-sintetica}
+\end{figure}
+
+## Evaluación de un modelo de referencia
+
+Hemos definido y evaluado un modelo de referencia, tanto en la base de datos
+sintética como en im2latex-170k.
+
+# Plan de trabajo
 
 Dividiremos este trabajo en dos etapas. En la primera la base de datos elegida
 queda fijada e iteramos sobre los datos y el modelo para mejorarlo todo lo
