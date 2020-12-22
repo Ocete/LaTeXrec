@@ -1,0 +1,7 @@
+.ipynb_checkpoints
+venv/
+*~
+\#*\#
+*.zip
+*.pdf
+random-notebooks/
