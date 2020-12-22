@@ -67,6 +67,10 @@ Lo primero que hemos hecho ha sido crear una base de datos similar a las que
 pretendemos tratar, en la que las fórmulas han sido generadas a partir de una
 gramática relativamente sencilla, que contiene una cantidad pequeña de símbolos.
 
+Hemos generado 50.000 ejemplos distintos. Los guiones Python que hemos escrito a
+tal efecto permiten cambiar la gramática y generar conjuntos de datos con
+cantidades arbitrarias de ejemplos únicos.
+
 Además, esta base de datos puede ser útil para evaluar cambios a la arquitectura
 o hiperparámetros de forma menos costosa.
 
@@ -107,7 +111,7 @@ seguiremos durante la primera etapa:
    comparación elemento a elemento (por ejemplo,
    [BLEU](https://en.wikipedia.org/wiki/BLEU)) con el objetivo de evaluar la
    cercanía entre la predicción y la salida esperada. Por ejemplo, si la salida
-   esperada es `[sin , x]`, las predicciones `[y, \sin]` y `[a, +, b, =, c ]`
+   esperada es `[\sin , x]`, las predicciones `[y, \sin]` y `[a, +, b, =, c ]`
    son ambas incorrectas, pero la primera es más cercana a ser correcta.
 
 3. El cuello de botella del modelo actual es el consumo de memoria de 
