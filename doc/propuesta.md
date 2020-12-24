@@ -200,7 +200,12 @@ seguiremos durante la primera etapa:
    con las recomendaciones del artículo en el que se propone la
    arquitectura transformer).
 
-8. Estudiaremos la posibilidad de usar Beam Search a la hora de la
+8. Estudiaremos la posibilidad de implementar codificación posicional
+   dos dimensional en vez de la unidimensional acual con el objetivo de
+   almacenar información no sólo sobre el orden sino también sobre la
+   posición relativa de los elementos en las imágenes.
+
+9. Estudiaremos la posibilidad de usar Beam Search a la hora de la
     evaluación del modelo, para obtener secuencias a las que el
     modelo asigne la máxima probabilidad.
 
