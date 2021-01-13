@@ -1,4 +1,4 @@
-all: propuesta.pdf
+all: propuesta.pdf bitácora.pdf
 
 propuesta.pdf: propuesta.md bibliography.bib
 	pandoc propuesta.md \
@@ -6,3 +6,10 @@ propuesta.pdf: propuesta.md bibliography.bib
 	--citeproc \
 	--bibliography bibliography.bib \
 	-o propuesta.pdf
+
+bitácora.pdf: bitácora.md bibliography.bib
+	pandoc bitácora.md \
+	--template pandoc-latex-template/eisvogel.tex \
+	--citeproc \
+	--bibliography bibliography.bib \
+	-o bitácora.pdf
