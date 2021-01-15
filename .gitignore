@@ -5,3 +5,6 @@ venv/
 *.zip
 *.pdf
 random-notebooks/
+data/toy-dataset/*.zip
+data/toy-dataset/*.lst
+data/toy-dataset/*_images*
