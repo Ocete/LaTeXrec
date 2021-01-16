@@ -1,3 +1,6 @@
 [submodule "doc/pandoc-latex-template"]
 	path = doc/pandoc-latex-template
 	url = https://github.com/Wandmalfarbe/pandoc-latex-template
+[submodule "src/performer"]
+	path = src/performer
+	url = https://github.com/danipozo/performer
