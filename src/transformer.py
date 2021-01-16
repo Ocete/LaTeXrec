@@ -1,5 +1,6 @@
 import tensorflow as tf
 from attention import MultiHeadAttention
+from conv_encoder import convolutional_network
 
 '''
 Implementation of the Transformer/Performer architecture.
