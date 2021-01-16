@@ -1,6 +1,7 @@
 import tensorflow as tf
 from attention import MultiHeadAttention
 from conv_encoder import convolutional_network
+import performer.fast_attention as fattn
 
 '''
 Implementation of the Transformer/Performer architecture.
@@ -16,10 +17,15 @@ def point_wise_feed_forward_network(d_model, dff):
 
 
 class EncoderLayer(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads, dff, rate=0.1):
+    def __init__(self, d_model, num_heads, dff, rate=0.1, fast_attn=False):
         super(EncoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(d_model, num_heads)
+        if fast_attn:
+            self.mha = fattn.Attention(d_model, num_heads, rate,
+                                       kernel_transformation=fattn.softmax_kernel_transformation,
+                                       projection_matrix_type=True)
+        else:
+            self.mha = MultiHeadAttention(d_model, num_heads)
         self.ffn = point_wise_feed_forward_network(d_model, dff)
 
         self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -164,12 +170,14 @@ class Decoder(tf.keras.layers.Layer):
         # x.shape == (batch_size, target_seq_len, d_model)
         return x, attention_weights
 
+
 class Transformer(tf.keras.Model):
     def __init__(self, num_layers, d_model, num_heads, dff,
                  target_vocab_size, pe_input, pe_target, cnn_encoder=None, rate=0.1):
         super(Transformer, self).__init__()
 
-        self.encoder = Encoder(num_layers, d_model, num_heads, dff, pe_input, cnn_encoder, rate)
+        self.encoder = Encoder(num_layers, d_model,
+                               num_heads, dff, pe_input, cnn_encoder, rate)
 
         self.decoder = Decoder(num_layers, d_model, num_heads, dff,
                                target_vocab_size, pe_target, rate)
