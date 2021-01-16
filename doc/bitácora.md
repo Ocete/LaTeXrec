@@ -26,10 +26,14 @@ ambigüedades, buscando un balance entre implementación sencilla y que merezca 
 pena porque sean lo suficientemente relevantes:
 
 - Los operadores con nombre más famosos (como seno, coseno, máximo y mínimo),
-  tienen un comando particular en $LaTeX$: `\sin`, `\cos`, `\max` y `\min`.
-  Utilizaremos estos comandos en vez del respectivo `\operatorname { sin }`.
-  Aplicaremos esta misma sustitución para otros comandos: `\tan`, `\arcsin`,
-  `\arccos` y `\arctan`.
+  tienen un comando particular en $LaTeX$: `\sin`, y `\max`. Utilizaremos estos
+  comandos en vez de los respectivo `\operatorname { sin }` y
+  `\operatorname { max }`. Aplicaremos está misma sustitución para los comandos
+  con un asterisco: `\operatorname* { sin }`. La lista completa de operadores a
+  la que le aplicamos essta sustitución es la siguiente: `\sin, \cos, \tan,
+  \arcsin, \arccos, \arctan, \sinh, \cosh, \tanh, \max, \min, \exp, \log, \ln,
+  \sup, \inf, \lim, \dim, \deg, \ker, \cot, \Pr, \lg, \arg, \det, \vol`.
+
 - El comando `\prime` se utiliza en $LateX$ para mostar una comilla grande. En
   caso de utilizarse como exponente (`^ { \prime }`) tiene la misma
   representación gráfica que una comilla simple: `'`. Sustituiremos la expresión

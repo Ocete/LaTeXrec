@@ -12,10 +12,14 @@ def remove_ambiguities(formula):
     """
     Removes all ambiguities from the given formula
     """
-
-    names = ['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan', 'max', 'min']
-    changes = [ ('\\operatorname {{ {} }}'.format(x),
-                 '\\{}'.format(x)) for x in names] + \
+    names = ['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan', 'max', 'min',
+             'exp', 'log', 'ln', 'sup', 'inf', 'lim', 'dim', 'deg', 'ker',
+             'cot', 'Pr', 'lg', 'arg', 'det', 'vol', 'sinh', 'cosh', 'tanh']
+    spaced_names = [ ' '.join(x) for x in names]
+    changes = [ ('\\operatorname {{ {} }}'.format(spaced_x), '\\{}'.format(x)) \
+                   for (x, spaced_x) in zip(names, spaced_names)] + \
+              [ ('\\operatorname* {{ {} }}'.format(spaced_x), '\\{}'.format(x)) \
+                   for (x, spaced_x) in zip(names, spaced_names)] + \
               [ ('^ { \\prime }', '\\\''), ('\\dagger', '\\dag'),
                 ('\\lbrace', '\\{'), ('\\rbrace', '\\}')  ]
 
