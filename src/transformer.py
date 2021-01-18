@@ -2,6 +2,7 @@ import tensorflow as tf
 from attention import MultiHeadAttention
 from conv_encoder import convolutional_network
 import performer.fast_attention as fattn
+from positional_encoding import positional_encoding
 
 '''
 Implementation of the Transformer/Performer architecture.
@@ -17,13 +18,14 @@ def point_wise_feed_forward_network(d_model, dff):
 
 
 class EncoderLayer(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads, dff, rate=0.1, fast_attn=False):
+    def __init__(self, d_model, num_heads, dff, rate=0.1, fast_attn=False, rand_feat=100):
         super(EncoderLayer, self).__init__()
 
         if fast_attn:
             self.mha = fattn.Attention(d_model, num_heads, rate,
                                        kernel_transformation=fattn.softmax_kernel_transformation,
-                                       projection_matrix_type=True)
+                                       projection_matrix_type=True,
+                                       nb_random_features=rand_feat)
         else:
             self.mha = MultiHeadAttention(d_model, num_heads)
         self.ffn = point_wise_feed_forward_network(d_model, dff)
