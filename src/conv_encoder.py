@@ -17,30 +17,34 @@ def conv_bn_elu(n_filters):
     ])
 
 
-def resnet_encoder(d_model):
+def resnet_encoder(d_model, n_filters):
     """
     A simple residual network.
     """
     inputs = tf.keras.layers.Input(shape=(None, None, 1))
-    block_output_1 = conv_bn_elu(64)(inputs)
+    block_output_1 = conv_bn_elu(n_filters)(inputs)
     block_output_1 = tf.keras.layers.MaxPooling2D(
-        pool_size=(2, 2))(block_output_1)
+        pool_size=(2, 2)
+    )(block_output_1)
 
-    block_output_2 = conv_bn_elu(64)(block_output_1)
+    block_output_2 = conv_bn_elu(n_filters)(block_output_1)
     block_output_2 = tf.keras.layers.add([block_output_1, block_output_2])
 
-    block_output_3 = conv_bn_elu(64)(block_output_2)
+    block_output_3 = conv_bn_elu(n_filters)(block_output_2)
     block_output_3 = tf.keras.layers.add([block_output_2, block_output_3])
     block_output_3 = tf.keras.layers.MaxPooling2D(
-        pool_size=(2, 2))(block_output_3)
+        pool_size=(2, 2)
+    )(block_output_3)
 
-    block_output_4 = conv_bn_elu(64)(block_output_3)
+    block_output_4 = conv_bn_elu(n_filters)(block_output_3)
     block_output_4 = tf.keras.layers.add([block_output_3, block_output_4])
     block_output_4 = tf.keras.layers.MaxPooling2D(
-        pool_size=(2, 2))(block_output_4)
+        pool_size=(2, 2)
+    )(block_output_4)
 
     block_output_5 = conv_bn_elu(d_model)(block_output_4)
-    return inputs, block_output_5
+
+    return tf.keras.Model(inputs, block_output_5)
 
 
 def resnet_decoder(enc_output, n_filters):
@@ -53,11 +57,13 @@ def resnet_decoder(enc_output, n_filters):
     """
     return vanilla_decoder(enc_output, n_filters, 3)
 
+
 def vanilla_encoder(d_model, n_filters):
     """
     A simple convolutional network for a baseline model.
     """
     return tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(None, None, 1)),
         conv_bn_elu(n_filters),
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
         conv_bn_elu(n_filters),
