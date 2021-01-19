@@ -130,45 +130,51 @@ def load_dataset(base_path,
     
     return train_df, test_df.reset_index(drop=True)
 
-# DEPRECATED:
-def read_imgs_from_fn2l(fn2l_df,
-                        images_dir,
-                        from_i=0,
-                        to_i=-1,
-                        resize=True):
 
-    """
-    Load a certain range of images [from_i:to_i] from the given dataframe and
-    returns new dataframe with them.
-
-    Params:
-    - fn2l_df: dataframe where the images paths are obtained.
-    - images_dir: directory containing the images.
-    - from_i: index of the first image to be loaded. If -1, load every image.
-    - to_i: index of where to stop reading images.
-    - resize: whether all the images should be resized to the same height.
-    """
-
-    if to_i == -1:
-        to_i = len(fn2l_df)
-    new_df = fn2l_df[from_i:to_i].copy(deep=True)
-
-    # Read the images and resize them to the same height, preserving
-    # the aspect ratio.
-    height = 50
-    def read_img(f):
-        im = cv.imread(str(images_dir / f), cv.IMREAD_GRAYSCALE)
+class LaTeXrecDataset(tf.data.Dataset):
+    def read_img(images_dir, file_name):
+        height = 50
+        im = cv.imread(str(images_dir / file_name), cv.IMREAD_GRAYSCALE)
         if im is not None:
             im = im/255
             im = im[:,:,np.newaxis]
-            if resize:
-                im = tf.image.resize(im, [height, 10000],
-                                     preserve_aspect_ratio=True)
+            im = tf.image.resize(im, [height, 10000], preserve_aspect_ratio=True)            
         return im
+    
+    def _generator(cls, df, images_dir, tokenized_formulas):
+        for index, row in df.iterrows():
+            img = cls.read_img(images_dir, row['filename'])
+            token_seq = tokenized_formulas[index]
+            
+            imgs_generator = lambda: iter([img].apply(lambda x: tf.cast(x, dtype=tf.float16)))
+            dataset_img = tf.data.Dataset.from_generator(
+                imgs_generator, output_types=tf.float16).map(lambda x: x) # Convert to Tensor
+            
+            dataset_seq = tf.data.Dataset.from_tensor_slices([token_seq]).map(lambda x: x) # Convert to Tensor
 
-    new_df['image'] = new_df['filename'].apply(read_img)
+            yield (img, token_seq)
 
-    # Remove images that couldn't be read
-    new_df = new_df[new_df['image'].apply(lambda x: x is not None)]
+    def __new__(cls, df, images_dir):
+        # Train the tokenizer and precompute all the tokenized formulas
+        tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=1000,
+                                                          oov_token="<unk>",
+                                                          filters='!"#$%&:;?@`~ ')
+        tokenizer.fit_on_texts(df['formula'])
+        tokenized_formulas = tokenizer.texts_to_sequences(df['formula'])
+        tokenized_formulas = list(map(lambda x: [len(tokenizer.word_index)] + x +
+                              [len(tokenizer.word_index)+1], tokenized_formulas))
+        tokenized_formulas = tf.ragged.constant(tokenized_formulas)
+        
+        return tf.data.Dataset.from_generator(
+            lambda: cls._generator(cls, df, images_dir, tokenized_formulas),
+            output_types=(tf.Tensor, tf.Tensor),
+            # output_shapes=(1,)
+            # args=(df, images_dir, tokenized_formulas)
+        )
 
-    return new_df
+
+# How to use the LaTeXrecDataset class
+image_dir = get_paths(1)[1]
+ds = LaTeXrecDataset(train_df[0:10], image_dir)
+for (img, form) in ds:
+    print(img.shape, ds)
