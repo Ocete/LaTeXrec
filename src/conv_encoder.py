@@ -43,41 +43,46 @@ def resnet_encoder(d_model):
     return inputs, block_output_5
 
 
-def resnet_decoder(enc_output):
+def resnet_decoder(enc_output, n_filters):
     """
     A decoder matching `resnet_encoder`, for training it in an
     unsupervised/self-supervised manner.
-    
+
     Params:
     - enc_output: the output of the encoder.
     """
-    x = tf.keras.layers.Conv2DTranspose(
-        64, activation='elu', kernel_size=3, padding='same', strides=(2, 2))(enc_output)
-    x = tf.keras.layers.Conv2D(
-        64, activation='elu', kernel_size=3, padding='same')(x)
-    x = tf.keras.layers.Conv2DTranspose(
-        1, activation='elu', padding='same', kernel_size=3, strides=(2, 2))(x)
-    x = tf.keras.layers.Conv2D(
-        64, activation='elu', kernel_size=3, padding='same')(x)
-    x = tf.keras.layers.Conv2DTranspose(
-        1, activation='elu', padding='same', kernel_size=3, strides=(2, 2))(x)
-    return x
+    return vanilla_decoder(enc_output, n_filters, 3)
 
-def convolutional_network(d_model):
+def vanilla_encoder(d_model, n_filters):
     """
     A simple convolutional network for a baseline model.
     """
     return tf.keras.Sequential([
-        tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.ELU(),
-        tf.keras.layers.MaxPooling2D(pool_size=(2,2)),
-        tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.ELU(),
-        tf.keras.layers.MaxPooling2D(pool_size=(2,2)),
-        tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.ELU(),
-        tf.keras.layers.MaxPooling2D(pool_size=(2,2)),
+        conv_bn_elu(n_filters),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        conv_bn_elu(n_filters),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        conv_bn_elu(n_filters),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        conv_bn_elu(d_model),
     ])
+
+
+def vanilla_decoder(enc_output, n_filters, n_layers):
+    x = enc_output
+    for i in range(n_layers):
+        x = tf.keras.layers.Conv2DTranspose(
+            n_filters,
+            activation='elu',
+            kernel_size=3,
+            padding='same',
+            strides=(2, 2)
+        )(x)
+        x = tf.keras.layers.Conv2D(
+            64,
+            activation='elu',
+            kernel_size=3,
+            padding='same'
+        )(x)
+
+    return x

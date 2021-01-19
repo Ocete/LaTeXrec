@@ -1,6 +1,6 @@
 import tensorflow as tf
 from attention import MultiHeadAttention
-from conv_encoder import convolutional_network
+from conv_encoder import vanilla_encoder
 import performer.fast_attention as fattn
 from positional_encoding import positional_encoding
 
@@ -64,7 +64,7 @@ class Encoder(tf.keras.layers.Layer):
                                                 self.d_model)
 
         if cnn_encoder is None:
-            self.cnn = convolutional_network(d_model)
+            self.cnn = vanilla_encoder(d_model)
         else:
             self.cnn = cnn_encoder
 
