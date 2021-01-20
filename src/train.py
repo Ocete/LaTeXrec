@@ -14,13 +14,31 @@ args = cli_arguments.parser.parse_args()
 
 # BUILD MODEL
 
-args = parser.parse_args()
+# - Build convolutional encoder
+if args.conv_encoder == 'vanilla':
+    cnn_encoder = conv_encoder.vanilla_encoder(d_model,
+                                               args.conv_filters)
+    if args.pretrain_conv_encoder == 'yes':
+        cnn_decoder = conv_encoder.vanilla_decoder(cnn_encoder.output,
+                                                   args.conv_filters,
+                                                   3)
+elif args.conv_encoder == 'resnet':
+    cnn_encoder = conv_encoder.resnet_encoder(d_model,
+                                              args.conv_filters)
+    if args.pretrain_conv_encoder == 'yes':
+        cnn_decoder = conv_encoder.resnet_decoder(cnn_encoder.output,
+                                                  args.conv_filters)
 
-# LOAD DATA
+# - Build transformer
 
-# BUILD MODEL
+# This should be the maximum length of an input to the transformer encoder.
+maximum_position_input = None  # TODO
+# This is the maximum allowed length of a target sequence.
+maximum_position_target = args.maximum_target_length
+# Size of the target vocabulary, plus 2 for start and end tokens.
+target_vocab_size = None  # TODO
 
-# Set model hyperparameters
+# Set rest of model hyperparameters
 num_layers = args.num_layers
 d_model = args.depth
 ff_units = args.feedforward_units
