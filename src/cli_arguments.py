@@ -122,6 +122,13 @@ model_group.add_argument(
 
 # TRAINING PARAMETERS
 training_group.add_argument(
+    '--conv-encoder-epochs',
+    type=int,
+    help='Number of epochs to pretrain the convolutional encoder.' + \
+    ' Required if --pretrain-conv-encoder is set'
+)
+
+training_group.add_argument(
     '--epochs',
     type=int,
     required=True,

@@ -1,7 +1,8 @@
 import datasets
-import transformer
-import conv_encoder
 import cli_arguments
+import conv_encoder
+import pretrain_encoder
+import transformer
 
 '''
 Main script used for training the model.
@@ -57,17 +58,17 @@ if d_model % num_heads != 0:
 if dropout < 0 or dropout > 1:
     raise ValueError('Dropout rate must be between 0 and 1')
 
-# Build convolutional encoder
-if args.conv_encoder == 'vanilla':
-    cnn_encoder = conv_encoder.vanilla_encoder(d_model,
-                                               args.conv_filters)
-    if args.pretrain_conv_encoder == 'yes':
-        cnn_decoder = conv_encoder.vanilla_decoder(cnn_encoder.output,
-                                                   args.conv_filters,
-                                                   3)
-elif args.conv_encoder == 'resnet':
-    cnn_encoder = conv_encoder.resnet_encoder(d_model,
-                                              args.conv_filters)
-    if args.pretrain_conv_encoder == 'yes':
-        cnn_decoder = conv_encoder.resnet_decoder(cnn_encoder.output,
-                                                  args.conv_filters)
+
+# - Pretrain encoder if requested
+if args.pretrain_conv_encoder == 'yes':
+    if args.conv_encoder_epochs is None:
+        raise ValueError('--conv-encoder-epochs must be set for pretraining')
+
+    pretrain_encoder.pretrain_conv_encoder(
+        cnn_encoder,
+        cnn_decoder,
+        dataset,
+        val_dataset,
+        args.conv_encoder_epochs,
+        8
+    )
