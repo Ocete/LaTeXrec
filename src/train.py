@@ -15,6 +15,13 @@ Main script used for training the model.
 args = cli_arguments.parser.parse_args()
 
 # LOAD DATA
+train_df, test_df = datasets.load_im2latex_dataset()
+image_dir = datasets.get_paths(1)[1]
+
+train_df, val_df = datasets.split_in_train_and_val(train_df)
+
+train_dataset = datasets.LaTeXrecDataset(train_df, image_dir).prefetch(tf.data.AUTOTUNE)
+val_dataset = datasets.LaTeXrecDataset(val_df, image_dir).prefetch(tf.data.AUTOTUNE)
 
 # BUILD MODEL
 

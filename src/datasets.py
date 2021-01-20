@@ -55,7 +55,7 @@ def load_dataset(base_path,
                  im2latex_configuration=False):
     
     """
-    Load a dataset.
+    Loads a dataset.
 
     Params:
     - base_path: directory in which it is contained.
@@ -126,15 +126,65 @@ def load_dataset(base_path,
     
     # Divide the data in (training + validation) and test
     j = int( (1.0 - test_fraction) * dataset_df.shape[0] )
-    train_df, test_df = dataset_df[:j], dataset_df[j:] 
+    train_df, test_df = dataset_df[:j], dataset_df[j:].reset_index(drop=True)
     
-    return train_df, test_df.reset_index(drop=True)
+    return train_df, test_df
 
+def split_in_train_and_val(df, val_fraction=0.1):
+    """
+    Splits the given dataframe in training and validation.
+
+    Params:
+    - df: dataframe to split.
+    - val_fraction: fraction of data used for validation.
+    """
+    
+    # Reshuffle the data, now with a random seed
+    shuffled_df = df.sample(frac=1).reset_index(drop=True)
+    
+    # Split the dataframe
+    j = int( (1.0 - val_fraction) * shuffled_df.shape[0] )
+    train_df, val_df = shuffled_df[:j], shuffled_df[j:].reset_index(drop=True)
+    
+    return train_df, val_df
+    
+train_df_2, val_df = split_in_train_and_val(train_df)
 
 class LaTeXrecDataset(tf.data.Dataset):
-    def read_img(images_dir, file_name):
+    """
+    This class holds a dataset with (image, tokenized_formula) pairs.
+    
+    The whole point of this class is not load dataset in memory, mainly
+    because of the images.
+    
+    IMPORTANT NOTE: This class must be initialize with the training data
+    before the val/test data so the tokenizer inside fits the correct data.
+
+    How to use:
+    
+    # Given the two dataframes, for train a test:
+    train_df, test_df = load_im2latex_dataset()
+    image_dir = get_paths(1)[1]
+    
+    # Instantiate two datasets, in this order!
+    train_dataset = LaTeXrecDataset(train_df, image_dir)
+    test_dataset = LaTeXrecDataset(test_df, image_dir)
+    
+    # Those elements are generators, use them as follows
+    for (img, tokenized_form) in train_dataset:
+        compute(img, tokenized_form)
+    """
+    
+    def read_img(file_path):
+        """
+        Reads a single image and resizes it to a fixed height, maintaining aspect ratio.
+
+        Params:
+        - file_path: a path to the image file.
+        """
+        
         height = 50
-        im = cv.imread(str(images_dir / file_name), cv.IMREAD_GRAYSCALE)
+        im = cv.imread(file_path, cv.IMREAD_GRAYSCALE)
         if im is not None:
             im = im/255
             im = im[:,:,np.newaxis]
@@ -142,39 +192,60 @@ class LaTeXrecDataset(tf.data.Dataset):
         return im
     
     def _generator(cls, df, images_dir, tokenized_formulas):
+        """
+        Yields a pair (img, tokenized_formula) at a time
+        for each line of the given dataframe.
+
+        Params:
+        - df: dataframe containing file_name for each image and
+          the corresponding formula.
+        - images_dir: a path to the directory where all the images are.
+        - tokenized_formulas: A vector with all the tokenized formulas,
+          shares indexes with the df.
+        """
+        
         for index, row in df.iterrows():
-            img = cls.read_img(images_dir, row['filename'])
+            # Try to read the image. If not found, skip the df row
+            img = cls.read_img( str(images_dir / row['filename']) )
+            if img is None:
+                continue
+            
+            # Extract the single tokenized_formula matching the image
             token_seq = tokenized_formulas[index]
             
-            imgs_generator = lambda: iter([img].apply(lambda x: tf.cast(x, dtype=tf.float16)))
-            dataset_img = tf.data.Dataset.from_generator(
-                imgs_generator, output_types=tf.float16).map(lambda x: x) # Convert to Tensor
-            
-            dataset_seq = tf.data.Dataset.from_tensor_slices([token_seq]).map(lambda x: x) # Convert to Tensor
-
             yield (img, token_seq)
 
     def __new__(cls, df, images_dir):
-        # Train the tokenizer and precompute all the tokenized formulas
-        tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=1000,
-                                                          oov_token="<unk>",
-                                                          filters='!"#$%&:;?@`~ ')
-        tokenizer.fit_on_texts(df['formula'])
-        tokenized_formulas = tokenizer.texts_to_sequences(df['formula'])
-        tokenized_formulas = list(map(lambda x: [len(tokenizer.word_index)] + x +
-                              [len(tokenizer.word_index)+1], tokenized_formulas))
+        """
+        Returns a generator that yields a pair (img, tokenized_formula) at a time
+        for each line of the given dataframe.
+
+        Params:
+        - df: dataframe containing file_name for each image and the
+          corresponding formula.
+        - images_dir: a path to the directory where all the images are.
+        """
+        
+        # If this is the first time the class is instantiated, train the tokenizer
+        # Keypoint: This is assuming the first dataset instantiated is the training
+        # dataset, otherwise the tokenizer will be trained with the val/test data.
+        if not hasattr(cls, 'tokenizer'):
+            # Train the tokenizer and precompute all the tokenized formulas
+            cls.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=1000,
+                                                              oov_token="<unk>",
+                                                              filters='!"#$%&:;?@`~ ')
+            # Save the number of words in our alphabet
+            cls.alph_size = len(cls.tokenizer.word_index)
+        
+        # Use the tokenizer to build the build the tokenized formulas
+        cls.tokenizer.fit_on_texts(df['formula'])
+        tokenized_formulas = cls.tokenizer.texts_to_sequences(df['formula'])
+        tokenized_formulas = list(map(lambda x: [len(cls.tokenizer.word_index)] + x +
+                              [len(cls.tokenizer.word_index)+1], tokenized_formulas))
         tokenized_formulas = tf.ragged.constant(tokenized_formulas)
         
+        # Return the data using a generator 
         return tf.data.Dataset.from_generator(
             lambda: cls._generator(cls, df, images_dir, tokenized_formulas),
-            output_types=(tf.Tensor, tf.Tensor),
-            # output_shapes=(1,)
-            # args=(df, images_dir, tokenized_formulas)
+            output_types=(tf.uint8, tf.float32),
         )
-
-
-# How to use the LaTeXrecDataset class
-image_dir = get_paths(1)[1]
-ds = LaTeXrecDataset(train_df[0:10], image_dir)
-for (img, form) in ds:
-    print(img.shape, ds)
