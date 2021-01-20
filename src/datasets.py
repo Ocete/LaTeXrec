@@ -55,7 +55,7 @@ def load_dataset(base_path,
                  im2latex_configuration=False):
     
     """
-    Load a dataset.
+    Loads a dataset.
 
     Params:
     - base_path: directory in which it is contained.
@@ -126,10 +126,29 @@ def load_dataset(base_path,
     
     # Divide the data in (training + validation) and test
     j = int( (1.0 - test_fraction) * dataset_df.shape[0] )
-    train_df, test_df = dataset_df[:j], dataset_df[j:] 
+    train_df, test_df = dataset_df[:j], dataset_df[j:].reset_index(drop=True)
     
-    return train_df, test_df.reset_index(drop=True)
+    return train_df, test_df
 
+def split_in_train_and_val(df, val_fraction=0.1):
+    """
+    Splits the given dataframe in training and validation.
+
+    Params:
+    - df: dataframe to split.
+    - val_fraction: fraction of data used for validation.
+    """
+    
+    # Reshuffle the data, now with a random seed
+    shuffled_df = df.sample(frac=1).reset_index(drop=True)
+    
+    # Split the dataframe
+    j = int( (1.0 - val_fraction) * shuffled_df.shape[0] )
+    train_df, val_df = shuffled_df[:j], shuffled_df[j:].reset_index(drop=True)
+    
+    return train_df, val_df
+    
+train_df_2, val_df = split_in_train_and_val(train_df)
 
 class LaTeXrecDataset(tf.data.Dataset):
     """
@@ -140,6 +159,7 @@ class LaTeXrecDataset(tf.data.Dataset):
     
     IMPORTANT NOTE: This class must be initialize with the training data
     before the val/test data so the tokenizer inside fits the correct data.
+
     How to use:
     
     # Given the two dataframes, for train a test:
@@ -153,7 +173,6 @@ class LaTeXrecDataset(tf.data.Dataset):
     # Those elements are generators, use them as follows
     for (img, tokenized_form) in train_dataset:
         compute(img, tokenized_form)
-    
     """
     
     def read_img(file_path):
@@ -207,8 +226,8 @@ class LaTeXrecDataset(tf.data.Dataset):
         - images_dir: a path to the directory where all the images are.
         """
         
-        # If this is the first the class is instantiated, train the tokenizer
-        # Keypoint: This is assuming the first dataset instanciated is the training
+        # If this is the first time the class is instantiated, train the tokenizer
+        # Keypoint: This is assuming the first dataset instantiated is the training
         # dataset, otherwise the tokenizer will be trained with the val/test data.
         if not hasattr(cls, 'tokenizer'):
             # Train the tokenizer and precompute all the tokenized formulas
