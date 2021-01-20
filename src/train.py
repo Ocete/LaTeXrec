@@ -3,6 +3,9 @@ import cli_arguments
 import conv_encoder
 import pretrain_encoder
 import transformer
+import optimization
+
+import time
 
 '''
 Main script used for training the model.
@@ -85,3 +88,31 @@ model = transformer.Transformer(num_layers,
                                 pe_target=maximum_position_target,
                                 cnn_encoder=cnn_encoder,
                                 rate=dropout_rate)
+
+# - Build optimizer
+
+# Learning rate schedule, optimizer and optimizer parameters follows Vaswani et
+# al. (https://arxiv.org/abs/1706.03762).
+# TODO: make these parameters configurable
+lr = optimization.VaswaniSchedule(d_model)
+optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
+                                     beta_1=0.9,
+                                     beta_2=0.98,
+                                     epsilon=1e-9)
+
+# SET UP CHECKPOINTING
+
+checkpoint_path = "./checkpoints/train"
+ckpt = tf.train.Checkpoint(transformer=transformer,
+                           optimizer=optimizer)
+
+ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
+
+# TRAIN MODEL
+
+for epoch in range(args.epochs):
+    start = time.time()
+
+    
+
+    print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
