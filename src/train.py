@@ -72,3 +72,16 @@ if args.pretrain_conv_encoder == 'yes':
         args.conv_encoder_epochs,
         8
     )
+
+    cnn_encoder.trainable = False
+
+# - Finally build the Transformer model
+model = transformer.Transformer(num_layers,
+                                d_model,
+                                num_heads,
+                                ff_units,
+                                target_vocab_size,
+                                pe_input=maximum_position_input,
+                                pe_target=maximum_position_target,
+                                cnn_encoder=cnn_encoder,
+                                rate=dropout_rate)
