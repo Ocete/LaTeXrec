@@ -15,13 +15,41 @@ Main script used for training the model.
 args = cli_arguments.parser.parse_args()
 
 # LOAD DATA
-train_df, test_df = datasets.load_im2latex_dataset()
-image_dir = datasets.get_paths(1)[1]
 
+# - Load dataset, ignore test dataset
+if args.dataset == 'im2latex':
+    train_df, _ = datasets.load_im2latex_dataset()
+    image_dir = datasets.get_paths(1)[1]
+elif args.dataset == 'toy_50k':
+    train_df, _ = datasets.load_toy_dataset()
+    image_dir = datasets.get_paths(0)[1]
+
+# - Split in train/val and get tf.data.Dataset objects
 train_df, val_df = datasets.split_in_train_and_val(train_df)
 
-train_dataset = datasets.LaTeXrecDataset(train_df, image_dir).prefetch(tf.data.AUTOTUNE)
-val_dataset = datasets.LaTeXrecDataset(val_df, image_dir).prefetch(tf.data.AUTOTUNE)
+train_dataset = datasets.LaTeXrecDataset(
+    train_df, image_dir)
+val_dataset = datasets.LaTeXrecDataset(
+    val_df, image_dir)
+
+# - Configure datasets for batching and prefetching
+train_dataset = train_dataset\
+    .padded_batch(args.batch_size,
+                  padded_shapes=([-1, -1, 1], [-1]),
+                  padding_values=(
+                      tf.constant(1.0, dtype=tf.float16),
+                      tf.constant(datasets.LaTeXrecDataset.alph_size+1)
+                  )
+                  ).prefetch(tf.data.AUTOTUNE)
+
+val_dataset = val_dataset\
+    .padded_batch(args.batch_size,
+                  padded_shapes=([-1, -1, 1], [-1]),
+                  padding_values=(
+                      tf.constant(1.0, dtype=tf.float16),
+                      tf.constant(datasets.LaTeXrecDataset.alph_size+1)
+                  )
+                  ).prefetch(tf.data.AUTOTUNE)
 
 # BUILD MODEL
 

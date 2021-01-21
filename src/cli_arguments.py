@@ -122,6 +122,13 @@ model_group.add_argument(
 
 # TRAINING PARAMETERS
 training_group.add_argument(
+    '--epochs',
+    type=int,
+    required=True,
+    help='Number of epochs to train'
+)
+
+training_group.add_argument(
     '--conv-encoder-epochs',
     type=int,
     help='Number of epochs to pretrain the convolutional encoder.' + \
@@ -129,10 +136,10 @@ training_group.add_argument(
 )
 
 training_group.add_argument(
-    '--epochs',
+    '--batch-size',
     type=int,
     required=True,
-    help='Number of epochs to train'
+    help='Batch size for training'
 )
 
 training_group.add_argument(
