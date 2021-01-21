@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 '''
 Functions for creating positional encoding tensors.
