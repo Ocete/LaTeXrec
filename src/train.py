@@ -4,6 +4,7 @@ import conv_encoder
 import pretrain_encoder
 import transformer
 import optimization
+import masks
 
 import time
 
@@ -145,9 +146,107 @@ ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
 
 # TRAIN MODEL
 
+# - Declare losses
+train_loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+    from_logits=True, reduction='none')
+
+val_loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+    from_logits=True, reduction='none')
+
+# - Declare metrics
+train_loss = tf.keras.metrics.Mean(name='train_loss')
+train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
+    name='train_accuracy'
+)
+
+val_loss = tf.keras.metrics.Mean(name='val_loss')
+val_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='val_accuracy')
+
+# - Functions implementing: loss, training step and evaluation
+
+
+def loss_function(real, pred, loss_object):
+    """
+    Don't take into account masked out elements in loss calculation.
+    """
+    mask = tf.math.logical_not(tf.math.equal(real, 0))
+    loss_ = loss_object(real, pred)
+
+    mask = tf.cast(mask, dtype=loss_.dtype)
+    loss_ *= mask
+
+    return tf.reduce_mean(loss_)
+
+
+def train_step(inp, tar):
+    """
+    A training step on a batch.
+    """
+    tar_inp = tar[:, :-1]
+    tar_real = tar[:, 1:]
+
+    mask = masks.create_look_ahead_mask(tf.shape(tar_inp)[1])
+
+    with tf.GradientTape() as tape:
+        predictions, _ = transformer(inp, tar_inp,
+                                     True,
+                                     enc_padding_mask=None,
+                                     look_ahead_mask=mask,
+                                     dec_padding_mask=None)
+        loss = loss_function(tar_real, predictions, train_loss_object)
+
+    gradients = tape.gradient(loss, transformer.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, transformer.trainable_variables))
+
+    train_loss(loss)
+    train_accuracy(tar_real, predictions)
+
+
+def evaluate():
+    """
+    Evaluate the model on the validation set.
+    """
+    val_loss.reset_states()
+    for inp, tar in val_dataset:
+        tar_inp = tar[:, :-1]
+        tar_real = tar[:, 1:]
+
+        mask = masks.create_look_ahead_mask(tf.shape(tar_inp)[1])
+
+        predictions, _ = transformer(inp, tar_inp,
+                                     training=False,
+                                     enc_padding_mask=None,
+                                     look_ahead_mask=mask,
+                                     dec_padding_mask=None)
+
+        loss = loss_function(tar_real, predictions, val_loss_object)
+        val_loss(loss)
+        val_accuracy(tar_real, predictions)
+
+
+# - Training loop
 for epoch in range(args.epochs):
     start = time.time()
 
-    
+    train_loss.reset_states()
+    train_accuracy.reset_states()
+
+    for batch, (inp, tar) in enumerate(train_dataset):
+        train_step(inp, tar)
+
+        if batch % 50 == 0:
+            evaluate()
+            print('Epoch {}\tbatch {}\t' +
+                  'Loss {:.4f}\tAccuracy {:.4f}\t' +
+                  'Val. loss {:.4f}\tVal. acc. {:.4f}'
+                  .format(
+                      epoch + 1,
+                      batch,
+                      train_loss.result(),
+                      train_accuracy.result(),
+                      val_loss.result(),
+                      val_accuracy.result()
+                  )
+                  )
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
