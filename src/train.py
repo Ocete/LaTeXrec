@@ -71,12 +71,12 @@ elif args.conv_encoder == 'resnet':
 
 # - Build transformer
 
-# This should be the maximum length of an input to the transformer encoder.
-maximum_position_input = None  # TODO
+# This should be the maximum allowed length of an input to the transformer encoder.
+maximum_position_input = 3000
 # This is the maximum allowed length of a target sequence.
 maximum_position_target = args.maximum_target_length
 # Size of the target vocabulary, plus 2 for start and end tokens.
-target_vocab_size = None  # TODO
+target_vocab_size = datasets.LaTeXrecDataset.alph_size
 
 # Set rest of model hyperparameters
 num_layers = args.num_layers
