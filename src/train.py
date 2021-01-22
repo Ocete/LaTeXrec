@@ -6,6 +6,7 @@ import transformer
 import optimization
 import masks
 
+import tensorflow as tf
 import time
 
 '''
@@ -39,8 +40,9 @@ train_dataset = train_dataset\
     .padded_batch(args.batch_size,
                   padded_shapes=([-1, -1, 1], [-1]),
                   padding_values=(
-                      tf.constant(1.0, dtype=tf.float16),
-                      tf.constant(datasets.LaTeXrecDataset.alph_size+1)
+                      tf.constant(1, dtype=tf.uint8),
+                      tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+                                  dtype=tf.float32)
                   )
                   ).prefetch(tf.data.AUTOTUNE)
 
@@ -48,8 +50,9 @@ val_dataset = val_dataset\
     .padded_batch(args.batch_size,
                   padded_shapes=([-1, -1, 1], [-1]),
                   padding_values=(
-                      tf.constant(1.0, dtype=tf.float16),
-                      tf.constant(datasets.LaTeXrecDataset.alph_size+1)
+                      tf.constant(1, dtype=tf.uint8),
+                      tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+                                  dtype=tf.float32)
                   )
                   ).prefetch(tf.data.AUTOTUNE)
 
