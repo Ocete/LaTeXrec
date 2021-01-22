@@ -1,10 +1,11 @@
-import datasets
 import cli_arguments
 import conv_encoder
+import datasets
+import log
+import masks
+import optimization
 import pretrain_encoder
 import transformer
-import optimization
-import masks
 
 import tensorflow as tf
 import time
@@ -15,6 +16,10 @@ Main script used for training the model.
 
 # ARGUMENT PARSING
 args = cli_arguments.parser.parse_args()
+
+# LOG PARAMS AND INITIALIZE LOGGING
+log.log_params(args)
+log.set_logging(args, mode=0)
 
 # LOAD DATA
 remove_ambiguities = args.remove_ambiguities == 'yes'
@@ -236,9 +241,9 @@ for epoch in range(args.epochs):
 
         if batch % 50 == 0:
             evaluate()
-            print(('Epoch {}\tbatch {}\t' +
+            msg = ('Epoch {}\tbatch {}\t' +
                   'Loss {:.4f}\tAccuracy {:.4f}\t' +
-                  'Val. loss {:.4f}\tVal. acc. {:.4f}')
+                  'Val. loss {:.4f}\tVal. acc. {:.4f}')\
                   .format(
                       epoch + 1,
                       batch,
@@ -247,6 +252,9 @@ for epoch in range(args.epochs):
                       val_loss.result(),
                       val_accuracy.result()
                   )
-                  )
+            log.log(msg)
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+
+log.set_logging(args, mode=1)
+# TODO: log checkpoints

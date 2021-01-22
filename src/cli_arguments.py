@@ -46,6 +46,12 @@ data_loading.add_argument(
     help='Whether to remove ambiguities from formulas'
 )
 
+data_loading.add_argument(
+    '--log-folder-name',
+    type=str,
+    help='Name of folfer where logs will be saved'
+)
+
 # MODEL ARGUMENTS
 
 # - Transformer arguments
