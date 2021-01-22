@@ -67,8 +67,8 @@ def encoder_pretraining(encoder,
             if batch % 20 == 0:
                 evaluate()
 
-                print('Epoch {} batch {} ' +
-                      'loss {:.4f} val. loss: {:.4f}'.format(epoch + 1,
+                print(('Epoch {} batch {} ' +
+                      'loss {:.4f} val. loss: {:.4f}').format(epoch + 1,
                                                              batch,
                                                              train_loss.result(),
                                                              val_loss.result()))

@@ -39,7 +39,7 @@ class EncoderLayer(tf.keras.layers.Layer):
     def call(self, x, training):
 
         # (batch_size, input_seq_len, d_model)
-        attn_output = self.mha(x, x, x)
+        attn_output, _ = self.mha(x, x, x)
         attn_output = self.dropout1(attn_output, training=training)
         # (batch_size, input_seq_len, d_model)
         out1 = self.layernorm1(x + attn_output)
@@ -174,15 +174,23 @@ class Decoder(tf.keras.layers.Layer):
 
 
 class Transformer(tf.keras.Model):
-    def __init__(self, num_layers, d_model, num_heads, dff,
-                 target_vocab_size, pe_input, pe_target, cnn_encoder=None, rate=0.1):
+    def __init__(self,
+                 num_layers,
+                 d_model,
+                 num_heads,
+                 dff,
+                 target_vocab_size,
+                 pe_input,
+                 pe_target,
+                 cnn_encoder=None,
+                 rate=0.1):
         super(Transformer, self).__init__()
 
         self.encoder = Encoder(num_layers, d_model,
                                num_heads, dff, pe_input, cnn_encoder, rate)
 
-        self.decoder = Decoder(num_layers, d_model, num_heads, dff,
-                               target_vocab_size, pe_target, rate)
+        self.decoder = Decoder(num_layers, d_model,
+                               num_heads, dff, target_vocab_size, pe_target, rate)
 
         self.final_layer = tf.keras.layers.Dense(target_vocab_size)
 
