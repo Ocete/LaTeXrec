@@ -36,16 +36,24 @@ def get_paths(dataset):
     return [base_path, images_dir, filename2line_train, formulas_file]
 
 
-def load_toy_dataset():
+def load_toy_dataset(remove_amb):
     base_path, images_dir, filename2line_train, formulas_file = get_paths(0)
-    return load_dataset(base_path, images_dir, filename2line_train, formulas_file)
+    return load_dataset(base_path,
+                        images_dir,
+                        filename2line_train,
+                        formulas_file,
+                        remove_amb)
 
 
-def load_im2latex_dataset():
+def load_im2latex_dataset(remove_amb):
     base_path, images_dir, filename2line_train, formulas_file = get_paths(1)
-    return load_dataset(base_path, images_dir,
-                        filename2line_train, formulas_file,
-                        im2latex_configuration=True)
+    return load_dataset(base_path,
+                        images_dir,
+                        filename2line_train,
+                        formulas_file,
+                        remove_amb,
+                        im2latex_configuration=True
+                        )
 
 
 def load_dataset(base_path,
@@ -76,7 +84,8 @@ def load_dataset(base_path,
     """
 
     # If the dataset was previously computed, load it. Else, generate it.
-    if not force_reloading and Path(base_path / 'filename_formulas_df.json').exists():
+    if not force_reloading and \
+       Path(base_path / 'filename_formulas_df.json').exists():
         dataset_df = pd.read_json(base_path / 'filename_formulas_df.json')
 
     else:
@@ -240,11 +249,12 @@ class LaTeXrecDataset(tf.data.Dataset):
             cls.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=1000,
                                                                   oov_token="<unk>",
                                                                   filters='!"#$%&:;?@`~ ')
-            # Save the number of words in our alphabet
-            cls.alph_size = len(cls.tokenizer.word_index)
 
         # Use the tokenizer to build the build the tokenized formulas
         cls.tokenizer.fit_on_texts(df['formula'])
+        # Save the number of words in our alphabet
+        cls.alph_size = len(cls.tokenizer.word_index)
+
         tokenized_formulas = cls.tokenizer.texts_to_sequences(df['formula'])
         tokenized_formulas = list(map(lambda x: [len(cls.tokenizer.word_index)] + x +
                                       [len(cls.tokenizer.word_index)+1], tokenized_formulas))
