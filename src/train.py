@@ -58,29 +58,14 @@ val_dataset = val_dataset\
 
 # BUILD MODEL
 
-# - Build convolutional encoder
-if args.conv_encoder == 'vanilla':
-    cnn_encoder = conv_encoder.vanilla_encoder(d_model,
-                                               args.conv_filters)
-    if args.pretrain_conv_encoder == 'yes':
-        cnn_decoder = conv_encoder.vanilla_decoder(cnn_encoder.output,
-                                                   args.conv_filters,
-                                                   3)
-elif args.conv_encoder == 'resnet':
-    cnn_encoder = conv_encoder.resnet_encoder(d_model,
-                                              args.conv_filters)
-    if args.pretrain_conv_encoder == 'yes':
-        cnn_decoder = conv_encoder.resnet_decoder(cnn_encoder.output,
-                                                  args.conv_filters)
-
-# - Build transformer
+# - Set hyperparameters
 
 # This should be the maximum allowed length of an input to the transformer encoder.
 maximum_position_input = 3000
 # This is the maximum allowed length of a target sequence.
 maximum_position_target = args.maximum_target_length
 # Size of the target vocabulary, plus 2 for start and end tokens.
-target_vocab_size = datasets.LaTeXrecDataset.alph_size
+target_vocab_size = datasets.LaTeXrecDataset.alph_size+2
 
 # Set rest of model hyperparameters
 num_layers = args.num_layers
@@ -101,7 +86,20 @@ if d_model % num_heads != 0:
 if dropout < 0 or dropout > 1:
     raise ValueError('Dropout rate must be between 0 and 1')
 
-
+# - Build convolutional encoder
+if args.conv_encoder == 'vanilla':
+    cnn_encoder = conv_encoder.vanilla_encoder(d_model,
+                                               args.conv_filters)
+    if args.pretrain_conv_encoder == 'yes':
+        cnn_decoder = conv_encoder.vanilla_decoder(cnn_encoder.output,
+                                                   args.conv_filters,
+                                                   3)
+elif args.conv_encoder == 'resnet':
+    cnn_encoder = conv_encoder.resnet_encoder(d_model,
+                                              args.conv_filters)
+    if args.pretrain_conv_encoder == 'yes':
+        cnn_decoder = conv_encoder.resnet_decoder(cnn_encoder.output,
+                                                  args.conv_filters)
 # - Pretrain encoder if requested
 if args.pretrain_conv_encoder == 'yes':
     if args.conv_encoder_epochs is None:
@@ -127,7 +125,7 @@ model = transformer.Transformer(num_layers,
                                 pe_input=maximum_position_input,
                                 pe_target=maximum_position_target,
                                 cnn_encoder=cnn_encoder,
-                                rate=dropout_rate)
+                                rate=dropout)
 
 # - Build optimizer
 
@@ -143,7 +141,7 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
 # SET UP CHECKPOINTING
 
 checkpoint_path = "./checkpoints/train"
-ckpt = tf.train.Checkpoint(transformer=transformer,
+ckpt = tf.train.Checkpoint(transformer=model,
                            optimizer=optimizer)
 
 ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
@@ -192,15 +190,14 @@ def train_step(inp, tar):
     mask = masks.create_look_ahead_mask(tf.shape(tar_inp)[1])
 
     with tf.GradientTape() as tape:
-        predictions, _ = transformer(inp, tar_inp,
-                                     True,
-                                     enc_padding_mask=None,
-                                     look_ahead_mask=mask,
-                                     dec_padding_mask=None)
+        predictions, _ = model(inp, tar_inp,
+                               True,
+                               look_ahead_mask=mask,
+                               dec_padding_mask=None)
         loss = loss_function(tar_real, predictions, train_loss_object)
 
-    gradients = tape.gradient(loss, transformer.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, transformer.trainable_variables))
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
     train_loss(loss)
     train_accuracy(tar_real, predictions)
@@ -217,11 +214,10 @@ def evaluate():
 
         mask = masks.create_look_ahead_mask(tf.shape(tar_inp)[1])
 
-        predictions, _ = transformer(inp, tar_inp,
-                                     training=False,
-                                     enc_padding_mask=None,
-                                     look_ahead_mask=mask,
-                                     dec_padding_mask=None)
+        predictions, _ = model(inp, tar_inp,
+                               training=False,
+                               look_ahead_mask=mask,
+                               dec_padding_mask=None)
 
         loss = loss_function(tar_real, predictions, val_loss_object)
         val_loss(loss)
@@ -240,9 +236,9 @@ for epoch in range(args.epochs):
 
         if batch % 50 == 0:
             evaluate()
-            print('Epoch {}\tbatch {}\t' +
+            print(('Epoch {}\tbatch {}\t' +
                   'Loss {:.4f}\tAccuracy {:.4f}\t' +
-                  'Val. loss {:.4f}\tVal. acc. {:.4f}'
+                  'Val. loss {:.4f}\tVal. acc. {:.4f}')
                   .format(
                       epoch + 1,
                       batch,
