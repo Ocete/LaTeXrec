@@ -39,6 +39,13 @@ data_loading.add_argument(
     help='Number of samples to train on'
 )
 
+data_loading.add_argument(
+    '--remove-ambiguities',
+    choices=['yes', 'no'],
+    required=True,
+    help='Whether to remove ambiguities from formulas'
+)
+
 # MODEL ARGUMENTS
 
 # - Transformer arguments

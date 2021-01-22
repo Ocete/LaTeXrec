@@ -16,13 +16,14 @@ Main script used for training the model.
 args = cli_arguments.parser.parse_args()
 
 # LOAD DATA
+remove_ambiguities = args.remove_ambiguities == 'yes'
 
 # - Load dataset, ignore test dataset
 if args.dataset == 'im2latex':
-    train_df, _ = datasets.load_im2latex_dataset()
+    train_df, _ = datasets.load_im2latex_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(1)[1]
 elif args.dataset == 'toy_50k':
-    train_df, _ = datasets.load_toy_dataset()
+    train_df, _ = datasets.load_toy_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(0)[1]
 
 # - Split in train/val and get tf.data.Dataset objects
