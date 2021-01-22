@@ -10,7 +10,7 @@ class VaswaniSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     al. (https://arxiv.org/abs/1706.03762).
     """
     def __init__(self, d_model, warmup_steps=4000):
-        super(CustomSchedule, self).__init__()
+        super(VaswaniSchedule, self).__init__()
     
         self.d_model = d_model
         self.d_model = tf.cast(self.d_model, tf.float32)
