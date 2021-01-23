@@ -237,8 +237,8 @@ for epoch in range(args.epochs):
         if batch % 50 == 0:
             evaluate()
             print(('Epoch {}\tbatch {}\t' +
-                  'Loss {:.4f}\tAccuracy {:.4f}\t' +
-                  'Val. loss {:.4f}\tVal. acc. {:.4f}')
+                   'loss {:.4f}\taccuracy {:.4f}\t' +
+                   'val. loss {:.4f}\tval. acc. {:.4f}')
                   .format(
                       epoch + 1,
                       batch,
@@ -246,7 +246,6 @@ for epoch in range(args.epochs):
                       train_accuracy.result(),
                       val_loss.result(),
                       val_accuracy.result()
-                  )
-                  )
+            ))
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
