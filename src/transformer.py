@@ -17,17 +17,19 @@ def point_wise_feed_forward_network(d_model, dff):
     ])
 
 
-class EncoderLayer(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads, dff, rate=0.1, fast_attn=False, rand_feat=100):
-        super(EncoderLayer, self).__init__()
+class PerformerEncoderLayer(tf.keras.layers.Layer):
+    def __init__(self,
+                 d_model,
+                 num_heads,
+                 dff,
+                 rand_feat=100,
+                 rate=0.1):
+        super(PerformerEncoderLayer, self).__init__()
 
-        if fast_attn:
-            self.mha = fattn.Attention(d_model, num_heads, rate,
-                                       kernel_transformation=fattn.softmax_kernel_transformation,
-                                       projection_matrix_type=True,
-                                       nb_random_features=rand_feat)
-        else:
-            self.mha = MultiHeadAttention(d_model, num_heads)
+        self.mha = fattn.Attention(d_model, num_heads, rate,
+                                   kernel_transformation=fattn.softmax_kernel_transformation,
+                                   projection_matrix_type=True,
+                                   nb_random_features=rand_feat)
         self.ffn = point_wise_feed_forward_network(d_model, dff)
 
         self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -37,7 +39,34 @@ class EncoderLayer(tf.keras.layers.Layer):
         self.dropout2 = tf.keras.layers.Dropout(rate)
 
     def call(self, x, training):
+        # (batch_size, input_seq_len, d_model)
+        attn_output = self.mha(x, x, x)
+        attn_output = self.dropout1(attn_output, training=training)
+        # (batch_size, input_seq_len, d_model)
+        out1 = self.layernorm1(x + attn_output)
 
+        ffn_output = self.ffn(out1)  # (batch_size, input_seq_len, d_model)
+        ffn_output = self.dropout2(ffn_output, training=training)
+        # (batch_size, input_seq_len, d_model)
+        out2 = self.layernorm2(out1 + ffn_output)
+
+        return out2
+
+
+class EncoderLayer(tf.keras.layers.Layer):
+    def __init__(self, d_model, num_heads, dff, rate=0.1, fast_attn=False, rand_feat=100):
+        super(EncoderLayer, self).__init__()
+
+        self.mha = MultiHeadAttention(d_model, num_heads)
+        self.ffn = point_wise_feed_forward_network(d_model, dff)
+
+        self.layernorm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
+        self.layernorm2 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
+
+        self.dropout1 = tf.keras.layers.Dropout(rate)
+        self.dropout2 = tf.keras.layers.Dropout(rate)
+
+    def call(self, x, training):
         # (batch_size, input_seq_len, d_model)
         attn_output, _ = self.mha(x, x, x)
         attn_output = self.dropout1(attn_output, training=training)
@@ -53,8 +82,12 @@ class EncoderLayer(tf.keras.layers.Layer):
 
 
 class Encoder(tf.keras.layers.Layer):
-    def __init__(self, num_layers, d_model, num_heads, dff,
-                 maximum_position_encoding, cnn_encoder=None, rate=0.1):
+    def __init__(self, num_layers,
+                 d_model,
+                 num_heads,
+                 dff,
+                 maximum_position_encoding,
+                 cnn_encoder=None, use_fast_attention_enc=False, rate=0.1):
         super(Encoder, self).__init__()
 
         self.d_model = d_model
@@ -68,8 +101,12 @@ class Encoder(tf.keras.layers.Layer):
         else:
             self.cnn = cnn_encoder
 
-        self.enc_layers = [EncoderLayer(d_model, num_heads, dff, rate)
-                           for _ in range(num_layers)]
+        if use_fast_attention_enc:
+            self.enc_layers = [PerformerEncoderLayer(d_model, num_heads, dff, rate)
+                               for _ in range(num_layers)]
+        else:
+            self.enc_layers = [EncoderLayer(d_model, num_heads, dff, rate)
+                               for _ in range(num_layers)]
 
         self.dropout = tf.keras.layers.Dropout(rate)
 
@@ -80,7 +117,7 @@ class Encoder(tf.keras.layers.Layer):
         x = tf.reshape(x, [x_s[0], -1, self.d_model])
         seq_len = tf.shape(x)[1]
 
-        # adding position encoding.
+        # Add position encoding.
         x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         x += self.pos_encoding[:, :seq_len, :]
 
@@ -183,11 +220,13 @@ class Transformer(tf.keras.Model):
                  pe_input,
                  pe_target,
                  cnn_encoder=None,
+                 use_fast_attention_enc=False,
                  rate=0.1):
         super(Transformer, self).__init__()
 
         self.encoder = Encoder(num_layers, d_model,
-                               num_heads, dff, pe_input, cnn_encoder, rate)
+                               num_heads, dff, pe_input,
+                               cnn_encoder, use_fast_attention_enc, rate)
 
         self.decoder = Decoder(num_layers, d_model,
                                num_heads, dff, target_vocab_size, pe_target, rate)
