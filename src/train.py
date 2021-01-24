@@ -19,18 +19,25 @@ args = cli_arguments.parser.parse_args()
 
 # LOG PARAMS AND INITIALIZE LOGGING
 log.log_params(args)
-log.set_logging(args, mode=0)
+development_logger = log.get_logger(args, mode=0)
+log.log(development_logger, 'DEVELOPMENT:')
 
 # LOAD DATA
 remove_ambiguities = args.remove_ambiguities == 'yes'
 
 # - Load dataset, ignore test dataset
+log.log(development_logger, 'Starting data loading.')
+
 if args.dataset == 'im2latex':
     train_df, _ = datasets.load_im2latex_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(1)[1]
 elif args.dataset == 'toy_50k':
     train_df, _ = datasets.load_toy_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(0)[1]
+
+# If 'samples' is an argument, take only those many samples
+if hasattr(args, 'samples'):
+    train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects
 train_df, val_df = datasets.split_in_train_and_val(train_df)
@@ -62,6 +69,7 @@ val_dataset = val_dataset\
                   ).prefetch(tf.data.AUTOTUNE)
 
 # BUILD MODEL
+log.log(development_logger, 'Starting to build the model.')
 
 # - Set hyperparameters
 
@@ -105,11 +113,13 @@ elif args.conv_encoder == 'resnet':
     if args.pretrain_conv_encoder == 'yes':
         cnn_decoder = conv_encoder.resnet_decoder(cnn_encoder.output,
                                                   args.conv_filters)
+
 # - Pretrain encoder if requested
 if args.pretrain_conv_encoder == 'yes':
     if args.conv_encoder_epochs is None:
         raise ValueError('--conv-encoder-epochs must be set for pretraining')
 
+    log.log(development_logger, 'Starting encoder pretraining.')
     pretrain_encoder.pretrain_conv_encoder(
         cnn_encoder,
         cnn_decoder,
@@ -145,13 +155,14 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
 
 # SET UP CHECKPOINTING
 
-checkpoint_path = "./checkpoints/train"
+checkpoint_path = './checkpoints/train'
 ckpt = tf.train.Checkpoint(transformer=model,
                            optimizer=optimizer)
 
 ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
 
 # TRAIN MODEL
+log.log(development_logger, 'Starting the model training.')
 
 # - Declare losses
 train_loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -253,9 +264,20 @@ for epoch in range(args.epochs):
                 val_loss.result(),
                 val_accuracy.result()
             )
-            log.log(msg)
+            log.log(development_logger, msg)
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 
-log.set_logging(args, mode=1)
-# TODO: log checkpoints
+
+# Log the final results of the experiment:
+results_logger = log.get_logger(args, mode=1)
+log.log(results_logger, 'FINAL RESULTS:')
+
+# TODO: get the info from the checkpoints that is actually 
+# interesintg (metrics)
+reader = tf.train.load_checkpoint(checkpoint_path)
+shape_from_key = reader.get_variable_to_shape_map()
+#dtype_from_key = reader.get_variable_to_dtype_map()
+
+for key in var_to_shape_map:
+    log.log(results_logger, '{}: {}'.format(key, reader.get_tensor(key)))
