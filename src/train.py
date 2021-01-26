@@ -9,6 +9,7 @@ import transformer
 
 import tensorflow as tf
 import time
+from pathlib import Path
 
 '''
 Main script used for training the model.
@@ -166,7 +167,7 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
 
 # SET UP CHECKPOINTING
 
-checkpoint_path = './checkpoints/train'
+checkpoint_path = str(Path(log_folder) / 'checkpoints')
 ckpt = tf.train.Checkpoint(transformer=model,
                            optimizer=optimizer)
 
@@ -280,27 +281,3 @@ for epoch in range(args.epochs):
             logger.info(msg)
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
-
-
-# Log the final results of the experiment:
-results_logger = log.get_logger(args, mode=1)
-log.log(results_logger, 'FINAL RESULTS:')
-
-log.log(results_logger, ckpt_manager.checkpoints[0])
-
-# TODO: get the info from the checkpoints that is actually
-# interesintg (metrics)
-
-reader = tf.train.load_checkpoint(checkpoint_path)
-shape_from_key = reader.get_variable_to_shape_map()
-#dtype_from_key = reader.get_variable_to_dtype_map()
-
-for cp_path in ckpt_manager.checkpoints:
-    reader = tf.train.load_checkpoint(cp_path)
-    log.log(results_logger, 'Logging checkpoint: {}'.format(cp_path))
-
-    dic = reader.get_variable_to_shape_map()
-    for key, val in dic.items():
-        log.log(results_logger, '{}: {}'.format(key, val))
-
-    log.log(results_logger, '\n')
