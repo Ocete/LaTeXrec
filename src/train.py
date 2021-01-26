@@ -18,15 +18,22 @@ Main script used for training the model.
 args = cli_arguments.parser.parse_args()
 
 # LOG PARAMS AND INITIALIZE LOGGING
-log.log_params(args)
-development_logger = log.get_logger(args, mode=0)
-log.log(development_logger, 'DEVELOPMENT:')
+
+# - Get and create logging folder
+log_folder = log.get_folder_path(args)
+
+# - Log CLI arguments
+log.log_params(log_folder)
+
+# - Get logger
+logger = log.get_logger(args, mode=0)
+logger.info('DEVELOPMENT:')
 
 # LOAD DATA
 remove_ambiguities = args.remove_ambiguities == 'yes'
 
 # - Load dataset, ignore test dataset
-log.log(development_logger, 'Starting data loading.')
+logger.info('Loading data')
 
 if args.dataset == 'im2latex':
     train_df, _ = datasets.load_im2latex_dataset(remove_ambiguities)
@@ -48,29 +55,32 @@ train_dataset = datasets.LaTeXrecDataset(
 val_dataset = datasets.LaTeXrecDataset(
     val_df, image_dir)
 
-# - Configure datasets for batching and prefetching
+# - Configure datasets for batching and prefetching. Pad images with ones (white
+# - when normalized to [0,1]), formulas with end token.
 train_dataset = train_dataset\
-    .padded_batch(args.batch_size,
-                  padded_shapes=([-1, -1, 1], [-1]),
-                  padding_values=(
-                      tf.constant(1, dtype=tf.uint8),
-                      tf.constant(datasets.LaTeXrecDataset.alph_size+1,
-                                  dtype=tf.float32)
-                  )
-                  ).prefetch(tf.data.AUTOTUNE)
+    .padded_batch(
+        args.batch_size,
+        padded_shapes=([-1, -1, 1], [-1]),
+        padding_values=(
+            tf.constant(1, dtype=tf.uint8),
+            tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+                        dtype=tf.float32)
+        )
+    ).prefetch(tf.data.AUTOTUNE)
 
 val_dataset = val_dataset\
-    .padded_batch(args.batch_size,
-                  padded_shapes=([-1, -1, 1], [-1]),
-                  padding_values=(
-                      tf.constant(1, dtype=tf.uint8),
-                      tf.constant(datasets.LaTeXrecDataset.alph_size+1,
-                                  dtype=tf.float32)
-                  )
-                  ).prefetch(tf.data.AUTOTUNE)
+    .padded_batch(
+        args.batch_size,
+        padded_shapes=([-1, -1, 1], [-1]),
+        padding_values=(
+            tf.constant(1, dtype=tf.uint8),
+            tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+                        dtype=tf.float32)
+        )
+    ).prefetch(tf.data.AUTOTUNE)
 
 # BUILD MODEL
-log.log(development_logger, 'Starting to build the model.')
+logger.info('Building model')
 
 # - Set hyperparameters
 
@@ -120,7 +130,7 @@ if args.pretrain_conv_encoder == 'yes':
     if args.conv_encoder_epochs is None:
         raise ValueError('--conv-encoder-epochs must be set for pretraining')
 
-    log.log(development_logger, 'Starting encoder pretraining.')
+    logger.info('Pretraining encoder')
     pretrain_encoder.pretrain_conv_encoder(
         cnn_encoder,
         cnn_decoder,
@@ -163,7 +173,7 @@ ckpt = tf.train.Checkpoint(transformer=model,
 ckpt_manager = tf.train.CheckpointManager(ckpt, checkpoint_path, max_to_keep=5)
 
 # TRAIN MODEL
-log.log(development_logger, 'Starting the model training.')
+logger.info('Starting the model training')
 
 # - Declare losses
 train_loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -267,7 +277,7 @@ for epoch in range(args.epochs):
                 val_loss.result(),
                 val_accuracy.result()
             )
-            log.log(development_logger, msg)
+            logger.info(msg)
 
     print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 
@@ -278,7 +288,7 @@ log.log(results_logger, 'FINAL RESULTS:')
 
 log.log(results_logger, ckpt_manager.checkpoints[0])
 
-# TODO: get the info from the checkpoints that is actually 
+# TODO: get the info from the checkpoints that is actually
 # interesintg (metrics)
 
 reader = tf.train.load_checkpoint(checkpoint_path)
