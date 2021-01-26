@@ -152,6 +152,7 @@ model = transformer.Transformer(num_layers,
                                 pe_input=maximum_position_input,
                                 pe_target=maximum_position_target,
                                 cnn_encoder=cnn_encoder,
+                                use_fast_attention_enc=performer_attention_encoder,
                                 rate=dropout)
 
 # - Build optimizer
