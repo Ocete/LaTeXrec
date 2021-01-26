@@ -102,7 +102,7 @@ class Encoder(tf.keras.layers.Layer):
             self.cnn = cnn_encoder
 
         if use_fast_attention_enc:
-            self.enc_layers = [PerformerEncoderLayer(d_model, num_heads, dff, rate)
+            self.enc_layers = [PerformerEncoderLayer(d_model, num_heads, dff, rate=rate)
                                for _ in range(num_layers)]
         else:
             self.enc_layers = [EncoderLayer(d_model, num_heads, dff, rate)
