@@ -50,13 +50,14 @@ def setup_logger(name, log_file_path, level=logging.INFO):
     return logger
 
 
-def log_params(folder_path):
+def log_params(folder_path, args):
     """
     Makes a new directory for the new experiment and logs the
     parameters used in this experiment in a new file.
 
     Params:
     - folder_path: path to logging folder
+    - args: arguments to log
     """
 
     # Log params
@@ -65,7 +66,7 @@ def log_params(folder_path):
         json.dump(vars(args))
 
 
-def get_logger(args, mode):
+def get_logger(args, log_folder, mode):
     """
     Returns the logger for the given mode.
 
@@ -78,8 +79,7 @@ def get_logger(args, mode):
     if mode != 0 and mode != 1:
         raise ValueError('mode must be either 0 or 1')
 
-    folder_path = get_folder_path(args)
     name = 'development' if mode == 0 else 'results'
-    file_path = os.path.join(folder_path, name + '.log')
+    file_path = os.path.join(log_folder, name + '.log')
 
     return setup_logger(name, file_path)

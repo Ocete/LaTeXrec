@@ -24,10 +24,10 @@ args = cli_arguments.parser.parse_args()
 log_folder = log.get_folder_path(args)
 
 # - Log CLI arguments
-log.log_params(log_folder)
+log.log_params(log_folder, args)
 
 # - Get logger
-logger = log.get_logger(args, mode=0)
+logger = log.get_logger(args, log_folder, mode=0)
 logger.info('DEVELOPMENT:')
 
 # LOAD DATA
