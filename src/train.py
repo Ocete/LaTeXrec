@@ -45,7 +45,6 @@ elif args.dataset == 'toy_50k':
 
 # - If 'samples' is an argument, take only those many samples
 if hasattr(args, 'samples') and not (args.samples is None):
-    print('hasattr!!')
     train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects
@@ -269,14 +268,8 @@ for epoch in range(args.epochs):
     for batch, (inp, tar) in enumerate(train_dataset):
         train_step(inp, tar)
 
-        history['loss'].append((step, train_loss.result()))
-        history['acc'].append((step, train_accuracy.result()))
-
         if batch % 50 == 0:
             evaluate()
-
-            history['val_loss'].append((step, val_loss.result()))
-            history['val_acc'].append((step, val_accuracy.result()))
 
             msg = ('Epoch {}\tbatch {}\t' +
                    'loss {:.4f}\taccuracy {:.4f}\t' +
@@ -290,9 +283,12 @@ for epoch in range(args.epochs):
                 val_accuracy.result()
             )
             logger.info(msg)
-
-        # Update step
-        step += 1
+            
+    history['loss'].append(train_loss.result().numpy())
+    history['acc'].append(train_accuracy.result().numpy())
+    
+    history['val_loss'].append(val_loss.result().numpy())
+    history['val_acc'].append(val_accuracy.result().numpy())
 
     logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 

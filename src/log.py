@@ -2,6 +2,7 @@ import logging
 import os
 import hashlib
 import json
+import pandas as pd
 
 
 def get_folder_path(args):
@@ -70,8 +71,9 @@ def log_history(folder_path, history):
     """
 
     file_path = os.path.join(folder_path, 'history.json')
+    history_df = pd.DataFrame(history)
     with open(file_path, 'w') as f:
-        json.dump(history, f)
+        f.write(history_df.to_json())
 
 
 def get_logger(args, log_folder, mode):
