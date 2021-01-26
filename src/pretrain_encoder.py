@@ -13,7 +13,8 @@ def encoder_pretraining(encoder,
                         dataset,
                         val_dataset,
                         epochs,
-                        cnn_reduction):
+                        cnn_reduction,
+                        logger):
     """
     Pretrain the convolutional encoder in an unsupervised fashion, by appending
     a decoder to it.
@@ -67,10 +68,13 @@ def encoder_pretraining(encoder,
             if batch % 20 == 0:
                 evaluate()
 
-                print(('Epoch {} batch {} ' +
-                      'loss {:.4f} val. loss: {:.4f}').format(epoch + 1,
-                                                             batch,
-                                                             train_loss.result(),
-                                                             val_loss.result()))
+                logger.info(
+                    ('Epoch {} batch {} ' +
+                     'loss {:.4f} val. loss: {:.4f}'
+                     ).format(epoch + 1,
+                              batch,
+                              train_loss.result(),
+                              val_loss.result()))
 
-        print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+        logger.info('Time taken for 1 epoch: {} secs\n'.format(
+            time.time() - start))

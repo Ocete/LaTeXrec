@@ -138,7 +138,8 @@ if args.pretrain_conv_encoder == 'yes':
         dataset,
         val_dataset,
         args.conv_encoder_epochs,
-        8
+        8,
+        logger
     )
 
     cnn_encoder.trainable = False
