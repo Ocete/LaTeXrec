@@ -36,7 +36,8 @@ elif args.dataset == 'toy_50k':
     image_dir = datasets.get_paths(0)[1]
 
 # - If 'samples' is an argument, take only those many samples
-if hasattr(args, 'samples'):
+if hasattr(args, 'samples') and not (args.samples is None):
+    print('hasattr!!')
     train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects

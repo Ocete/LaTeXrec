@@ -10,18 +10,19 @@ parser = argparse.ArgumentParser(
 )
 
 data_loading = parser.add_argument_group(
-    'Data loading',
-    'Data loading arguments'
+    'Data loading arguments',
 )
 
 model_group = parser.add_argument_group(
-    'Model',
-    'Model arguments'
+    'Model arguments',
 )
 
 training_group = parser.add_argument_group(
-    'Training',
-    'Training arguments'
+    'Training arguments',
+)
+
+logging_group = parser.add_argument_group(
+    'Logging arguments'
 )
 
 # DATA LOADING ARGUMENTS
@@ -44,12 +45,6 @@ data_loading.add_argument(
     choices=['yes', 'no'],
     required=True,
     help='Whether to remove ambiguities from formulas'
-)
-
-data_loading.add_argument(
-    '--log-folder-name',
-    type=str,
-    help='Name of folfer where logs will be saved'
 )
 
 # MODEL ARGUMENTS
@@ -167,4 +162,12 @@ training_group.add_argument(
     choices=['vaswani', 'constant', 'cyclical'],
     required=True,
     help='Learning rate schedule'
+)
+
+# LOGGING ARGUMENTS
+
+logging_group.add_argument(
+    '--log-folder-name',
+    type=str,
+    help='Name of folfer where logs will be saved'
 )
