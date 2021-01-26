@@ -35,7 +35,7 @@ data_loading.add_argument(
 data_loading.add_argument(
     '--samples',
     type=int,
-    required=True,
+    required=False,
     help='Number of samples to train on'
 )
 

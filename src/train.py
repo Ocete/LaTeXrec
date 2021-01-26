@@ -35,7 +35,7 @@ elif args.dataset == 'toy_50k':
     train_df, _ = datasets.load_toy_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(0)[1]
 
-# If 'samples' is an argument, take only those many samples
+# - If 'samples' is an argument, take only those many samples
 if hasattr(args, 'samples'):
     train_df = train_df[:args.samples]
 
