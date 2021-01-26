@@ -254,6 +254,9 @@ def evaluate():
         val_loss(loss)
         val_accuracy(tar_real, predictions)
 
+# - Training history, for metrics
+history = dict(loss=[], acc=[], val_loss=[], val_acc=[])
+step = 0
 
 # - Training loop
 for epoch in range(args.epochs):
@@ -265,8 +268,14 @@ for epoch in range(args.epochs):
     for batch, (inp, tar) in enumerate(train_dataset):
         train_step(inp, tar)
 
+        history['loss'].append((step, train_loss.result()))
+        history['acc'].append((step, train_accuracy.result()))
+
         if batch % 50 == 0:
             evaluate()
+
+            history['val_loss'].append((step, val_loss.result()))
+            history['val_acc'].append((step, val_accuracy.result()))
 
             msg = ('Epoch {}\tbatch {}\t' +
                    'loss {:.4f}\taccuracy {:.4f}\t' +
@@ -281,4 +290,10 @@ for epoch in range(args.epochs):
             )
             logger.info(msg)
 
-    print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+        # Update step
+        step += 1
+
+    logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+
+# - Log history
+log.log_history(log_folder, history)

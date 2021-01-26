@@ -52,8 +52,7 @@ def setup_logger(name, log_file_path, level=logging.INFO):
 
 def log_params(folder_path, args):
     """
-    Makes a new directory for the new experiment and logs the
-    parameters used in this experiment in a new file.
+    Logs the parameters used in this experiment in a new file.
 
     Params:
     - folder_path: path to logging folder
@@ -64,6 +63,15 @@ def log_params(folder_path, args):
     file_path = os.path.join(folder_path, 'params.json')
     with open(file_path, 'w') as f:
         json.dump(vars(args), f)
+
+def log_history(folder_path, history):
+    """
+    Logs the training history to a file.
+    """
+
+    file_path = os.path.join(folder_path, 'history.json')
+    with open(file_path, 'w') as f:
+        json.dump(history, f)
 
 
 def get_logger(args, log_folder, mode):
