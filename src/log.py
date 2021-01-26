@@ -63,7 +63,7 @@ def log_params(folder_path, args):
     # Log params
     file_path = os.path.join(folder_path, 'params.json')
     with open(file_path, 'w') as f:
-        json.dump(vars(args))
+        json.dump(vars(args), f)
 
 
 def get_logger(args, log_folder, mode):
