@@ -97,7 +97,7 @@ class Encoder(tf.keras.layers.Layer):
                                                 self.d_model)
 
         if cnn_encoder is None:
-            self.cnn = vanilla_encoder(d_model)
+            self.cnn = vanilla_encoder(d_model, 32)
         else:
             self.cnn = cnn_encoder
 
