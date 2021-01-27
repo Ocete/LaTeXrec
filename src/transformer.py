@@ -2,7 +2,7 @@ import tensorflow as tf
 from attention import MultiHeadAttention
 from conv_encoder import vanilla_encoder
 import performer.fast_attention as fattn
-from positional_encoding import positional_encoding
+from positional_encoding import positional_encoding_1d, positional_encoding_2d
 
 '''
 Implementation of the Transformer/Performer architecture.
@@ -86,15 +86,16 @@ class Encoder(tf.keras.layers.Layer):
                  d_model,
                  num_heads,
                  dff,
-                 maximum_position_encoding,
-                 cnn_encoder=None, use_fast_attention_enc=False, rate=0.1):
+                 pos_encoding,
+                 cnn_encoder=None,
+                 use_fast_attention_enc=False,
+                 rate=0.1):
         super(Encoder, self).__init__()
 
         self.d_model = d_model
         self.num_layers = num_layers
 
-        self.pos_encoding = positional_encoding(maximum_position_encoding,
-                                                self.d_model)
+        self.pos_encoding = pos_encoding
 
         if cnn_encoder is None:
             self.cnn = vanilla_encoder(d_model)
@@ -171,7 +172,7 @@ class DecoderLayer(tf.keras.layers.Layer):
 
 class Decoder(tf.keras.layers.Layer):
     def __init__(self, num_layers, d_model, num_heads, dff, target_vocab_size,
-                 maximum_position_encoding, rate=0.1):
+                 pos_encoding, rate=0.1):
         super(Decoder, self).__init__()
 
         self.d_model = d_model
@@ -180,8 +181,7 @@ class Decoder(tf.keras.layers.Layer):
         self.bn = tf.keras.layers.BatchNormalization()
 
         self.embedding = tf.keras.layers.Embedding(target_vocab_size, d_model)
-        self.pos_encoding = positional_encoding(
-            maximum_position_encoding, d_model)
+        self.pos_encoding = pos_encoding
 
         self.dec_layers = [DecoderLayer(d_model, num_heads, dff, rate)
                            for _ in range(num_layers)]
@@ -219,17 +219,29 @@ class Transformer(tf.keras.Model):
                  target_vocab_size,
                  pe_input,
                  pe_target,
+                 pe_2d_height,
+                 pe_2d_width,
+                 pos_encoding,
                  cnn_encoder=None,
                  use_fast_attention_enc=False,
                  rate=0.1):
         super(Transformer, self).__init__()
 
-        self.encoder = Encoder(num_layers, d_model,
-                               num_heads, dff, pe_input,
+        if pos_encoding == 'standard':
+            self.pos_encoding_enc = positional_encoding_1d(pe_input, d_model)
+            self.pos_encoding_dec = positional_encoding_1d(pe_target, d_model)
+        elif pos_encoding == '2d':
+            self.pos_encoding_enc = positional_encoding_2d(d_model, pe_2d_height,
+                                                           pe_2d_width)
+            self.pos_encoding_dec = self.pos_encoding_enc
+        else:
+            raise ValueError('Positional encoding must be either standard or \'2d\'.')
+
+        self.encoder = Encoder(num_layers, d_model, num_heads, dff, self.pos_encoding_enc,
                                cnn_encoder, use_fast_attention_enc, rate)
 
-        self.decoder = Decoder(num_layers, d_model,
-                               num_heads, dff, target_vocab_size, pe_target, rate)
+        self.decoder = Decoder(num_layers, d_model, num_heads, dff, target_vocab_size,
+                               self.pos_encoding_enc, rate)
 
         self.final_layer = tf.keras.layers.Dense(target_vocab_size)
 

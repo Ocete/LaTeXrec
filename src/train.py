@@ -99,6 +99,11 @@ maximum_position_target = args.maximum_target_length
 # Size of the target vocabulary, plus 2 for start and end tokens.
 target_vocab_size = datasets.LaTeXrecDataset.alph_size+2
 
+# For 2d positional encoding: set height and width. Width
+# must be the maximum size of a picture, hardcoded for now
+max_height = 50
+max_width = 4000
+
 # Set rest of model hyperparameters
 num_layers = args.num_layers
 d_model = args.depth
@@ -160,6 +165,9 @@ model = transformer.Transformer(num_layers,
                                 pe_input=maximum_position_input,
                                 pe_target=maximum_position_target,
                                 cnn_encoder=cnn_encoder,
+                                pe_2d_height=max_height,
+                                pe_2d_width=max_width,
+                                pos_encoding=pos_encoding,
                                 use_fast_attention_enc=performer_attention_encoder,
                                 rate=dropout)
 
@@ -265,7 +273,7 @@ def evaluate():
 logger.info('Initializing early stop params')
 es_params = { 
     'prev_val_acc': 0,
-    'min_val_increment': 0.1,
+    'min_val_increment': 0.001,
     'evals_without_increment': 0,
     'max_evals_without_incr': 5,
     'early_stopping_triggered': False
@@ -334,7 +342,7 @@ for epoch in range(args.epochs):
     logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 
     if es_params['early_stopping_triggered']:
-        logger.info('That was the last epoch due to early stopping.')
+        logger.info('That was the last epoch due to early stopping.\n')
         break
 
 # - Log history

@@ -80,7 +80,7 @@ cli_job_im2latex:
 		--log-folder-name toy_basic' \
 	--workspace .
 
-cli_job_im2latex_no_ambiguities:
+cli_job_im2latex_1d_pe:
 	gradient experiments run singlenode \
 	--name latexrec \
 	--projectId prqyjc7d5 \
@@ -90,7 +90,7 @@ cli_job_im2latex_no_ambiguities:
 		--dataset toy_50k \
 		--remove-ambiguities yes \
 		--num-layers 1 \
-		--depth 20 \
+		--depth 16 \
 		--feedforward-units 32 \
 		--num-heads 1 \
 		--dropout-rate 0.1 \
@@ -105,5 +105,5 @@ cli_job_im2latex_no_ambiguities:
 		--batch-size 16 \
 		--optimizer adam \
 		--lr-schedule vaswani \
-		--log-folder-name toy_without_ambiguities' \
+		--log-folder-name pe_1d_test' \
 	--workspace .
