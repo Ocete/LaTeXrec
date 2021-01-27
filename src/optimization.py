@@ -42,7 +42,7 @@ class RecurrentVaswaniSchedule(tf.keras.optimizers.schedules.LearningRateSchedul
     def __call__(self, step):
         if step > self.cycle_length:
             return 1/(step//cycle_length+1)**(0.75) * \
-                vaswani_step(step%self.cycle_length+self.warmup_steps)
+                self.vaswani_step(step%self.cycle_length+self.warmup_steps)
         else:
-            return vaswani_step(step)
+            return self.vaswani_step(step)
         
