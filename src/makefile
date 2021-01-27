@@ -23,46 +23,17 @@ test_script:
 	--lr-schedule vaswani \
 	--log-folder-name test1
 
-cli_job_im2latex:
+cli_job_im2latex_wed_1:
 	gradient experiments run singlenode \
 	--name latexrec \
 	--projectId prqyjc7d5 \
 	--container danipozo/latexrec \
 	--machineType 'P6000' \
 	--command 'python train.py \
-		--dataset toy_50k \
-		--samples 5 \
-		--remove-ambiguities yes \
-		--num-layers 1 \
-		--depth 20 \
-		--feedforward-units 32 \
-		--num-heads 1 \
-		--dropout-rate 0.1 \
-		--performer-attention-encoder no \
-		--positional-encoding standard \
-		--conv-encoder vanilla \
-		--conv-filters 32 \
-		--pretrain-conv-encoder no \
-		--maximum-target-length 200 \
-		--epochs 10 \
-		--conv-encoder-epochs 2 \
-		--batch-size 16 \
-		--optimizer adam \
-		--lr-schedule vaswani' \
-	--workspace .
-
-cli_job_im2latex:
-	gradient experiments run singlenode \
-	--name latexrec \
-	--projectId prqyjc7d5 \
-	--container danipozo/latexrec \
-	--machineType 'P6000' \
-	--command 'python train.py \
-		--dataset toy_50k \
-		--samples 0 \
+		--dataset im2latex \
 		--remove-ambiguities no \
 		--num-layers 1 \
-		--depth 20 \
+		--depth 16 \
 		--feedforward-units 32 \
 		--num-heads 1 \
 		--dropout-rate 0.1 \
@@ -72,22 +43,22 @@ cli_job_im2latex:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 10 \
+		--epochs 3 \
 		--conv-encoder-epochs 2 \
 		--batch-size 16 \
 		--optimizer adam \
 		--lr-schedule vaswani \
-		--log-folder-name toy_basic' \
+		--log-folder-name wednesday_1' \
 	--workspace .
 
-cli_job_im2latex_1d_pe:
+cli_job_im2latex_wed_2:
 	gradient experiments run singlenode \
 	--name latexrec \
 	--projectId prqyjc7d5 \
 	--container danipozo/latexrec \
 	--machineType 'P6000' \
 	--command 'python train.py \
-		--dataset toy_50k \
+		--dataset im2latex \
 		--remove-ambiguities yes \
 		--num-layers 1 \
 		--depth 16 \
@@ -100,10 +71,94 @@ cli_job_im2latex_1d_pe:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 10 \
+		--epochs 3 \
 		--conv-encoder-epochs 2 \
 		--batch-size 16 \
 		--optimizer adam \
 		--lr-schedule vaswani \
-		--log-folder-name pe_1d_test' \
+		--log-folder-name wednesday_1' \
+	--workspace .
+
+cli_job_im2latex_wed_3a:
+	gradient experiments run singlenode \
+	--name latexrec \
+	--projectId prqyjc7d5 \
+	--container danipozo/latexrec \
+	--machineType 'P6000' \
+	--command 'python train.py \
+		--dataset im2latex \
+		--remove-ambiguities yes \
+		--num-layers 1 \
+		--depth 16 \
+		--feedforward-units 32 \
+		--num-heads 1 \
+		--dropout-rate 0.1 \
+		--performer-attention-encoder yes \
+		--positional-encoding standard \
+		--conv-encoder vanilla \
+		--conv-filters 32 \
+		--pretrain-conv-encoder no \
+		--maximum-target-length 200 \
+		--epochs 3 \
+		--conv-encoder-epochs 2 \
+		--batch-size 16 \
+		--optimizer adam \
+		--lr-schedule vaswani \
+		--log-folder-name wednesday_1' \
+	--workspace .
+
+cli_job_im2latex_wed_3b:
+	gradient experiments run singlenode \
+	--name latexrec \
+	--projectId prqyjc7d5 \
+	--container danipozo/latexrec \
+	--machineType 'P6000' \
+	--command 'python train.py \
+		--dataset im2latex \
+		--remove-ambiguities yes \
+		--num-layers 1 \
+		--depth 16 \
+		--feedforward-units 32 \
+		--num-heads 1 \
+		--dropout-rate 0.1 \
+		--performer-attention-encoder no \
+		--positional-encoding standard \
+		--conv-encoder resnet \
+		--conv-filters 32 \
+		--pretrain-conv-encoder no \
+		--maximum-target-length 200 \
+		--epochs 3 \
+		--conv-encoder-epochs 2 \
+		--batch-size 16 \
+		--optimizer adam \
+		--lr-schedule vaswani \
+		--log-folder-name wednesday_1' \
+	--workspace .
+
+cli_job_im2latex_wed_3c:
+	gradient experiments run singlenode \
+	--name latexrec \
+	--projectId prqyjc7d5 \
+	--container danipozo/latexrec \
+	--machineType 'P6000' \
+	--command 'python train.py \
+		--dataset im2latex \
+		--remove-ambiguities yes \
+		--num-layers 1 \
+		--depth 16 \
+		--feedforward-units 32 \
+		--num-heads 1 \
+		--dropout-rate 0.1 \
+		--performer-attention-encoder np \
+		--positional-encoding 2d \
+		--conv-encoder vanilla \
+		--conv-filters 32 \
+		--pretrain-conv-encoder no \
+		--maximum-target-length 200 \
+		--epochs 3 \
+		--conv-encoder-epochs 2 \
+		--batch-size 16 \
+		--optimizer adam \
+		--lr-schedule vaswani \
+		--log-folder-name wednesday_1' \
 	--workspace .
