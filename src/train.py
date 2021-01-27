@@ -322,18 +322,19 @@ for epoch in range(args.epochs):
                 val_accuracy.result()
             )
             logger.info(msg)
+            
+            history['loss'].append(train_loss.result().numpy())
+            history['acc'].append(train_accuracy.result().numpy())
+            
+            history['val_loss'].append(val_loss.result().numpy())
+            history['val_acc'].append(val_accuracy.result().numpy())
+
 
             early_stopping()
             if es_params['early_stopping_triggered']:
                 logger.info('Early stopping triggered.')
                 break
             
-    history['loss'].append(train_loss.result().numpy())
-    history['acc'].append(train_accuracy.result().numpy())
-    
-    history['val_loss'].append(val_loss.result().numpy())
-    history['val_acc'].append(val_accuracy.result().numpy())
-
     logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 
     if es_params['early_stopping_triggered']:
