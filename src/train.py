@@ -55,6 +55,14 @@ train_dataset = datasets.LaTeXrecDataset(
 val_dataset = datasets.LaTeXrecDataset(
     val_df, image_dir)
 
+# - Filter images that are too wide
+train_dataset = train_dataset.filter(
+    lambda im, _: tf.shape(im)[1] < 3840
+)
+val_dataset = val_dataset.filter(
+    lambda im, _: tf.shape(im)[1] < 3840
+)
+
 # - Configure datasets for batching and prefetching. Pad images with ones (white
 # - when normalized to [0,1]), formulas with end token.
 train_dataset = train_dataset\
@@ -85,7 +93,7 @@ logger.info('Building model')
 # - Set hyperparameters
 
 # This should be the maximum allowed length of an input to the transformer encoder.
-maximum_position_input = 3000
+maximum_position_input = 5000
 # This is the maximum allowed length of a target sequence.
 maximum_position_target = args.maximum_target_length
 # Size of the target vocabulary, plus 2 for start and end tokens.
