@@ -57,4 +57,6 @@ def positional_encoding_2d(d_model, height, width):
     pe[d_model + 1::2, :, :] = np.tile(np.transpose(
         np.cos(pos_h * div_term), (1, 0))[:, :, np.newaxis], (1, 1, width))
 
-    return np.transpose(pe, (1,2,0))[np.newaxis, ...]
+    pe = np.transpose(pe, (1,2,0))[np.newaxis, ...]
+
+    return tf.cast(pe, dtype=tf.float32)
