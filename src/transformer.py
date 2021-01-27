@@ -227,15 +227,13 @@ class Transformer(tf.keras.Model):
                  rate=0.1):
         super(Transformer, self).__init__()
 
+        self.pos_encoding_dec = positional_encoding_1d(pe_target, d_model)
         if pos_encoding == 'standard':
             self.pos_encoding_enc = positional_encoding_1d(pe_input, d_model)
-            self.pos_encoding_dec = positional_encoding_1d(pe_target, d_model)
         elif pos_encoding == '2d':
             self.pos_encoding_enc = positional_encoding_2d(d_model, pe_2d_height,
                                                            pe_2d_width)
-            self.pos_encoding_dec = self.pos_encoding_enc
-        else:
-            raise ValueError('Positional encoding must be either standard or \'2d\'.')
+            self.pos_encoding_enc = tf.reshape(self.pos_encoding_enc, [1, -1, d_model])
 
         self.encoder = Encoder(num_layers, d_model, num_heads, dff, self.pos_encoding_enc,
                                cnn_encoder, use_fast_attention_enc, rate)
