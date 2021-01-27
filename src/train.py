@@ -44,7 +44,7 @@ elif args.dataset == 'toy_50k':
     image_dir = datasets.get_paths(0)[1]
 
 # - If 'samples' is an argument, take only those many samples
-if hasattr(args, 'samples') and not (args.samples is None):
+if hasattr(args, 'samples') and args.samples is not None:
     train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects
@@ -239,9 +239,6 @@ def train_step(inp, tar):
     train_loss(loss)
     train_accuracy(tar_real, predictions)
 
-    ckpt_manager.save()
-
-
 def evaluate():
     """
     Evaluate the model on the validation set.
@@ -261,6 +258,37 @@ def evaluate():
         loss = loss_function(tar_real, predictions, val_loss_object)
         val_loss(loss)
         val_accuracy(tar_real, predictions)
+
+    ckpt_manager.save()
+
+# Params for early stopping
+logger.info('Initializing early stop params')
+es_params = { 
+    'prev_val_acc': 0,
+    'min_val_increment': 0.1,
+    'evals_without_increment': 0,
+    'max_evals_without_incr': 5,
+    'early_stopping_triggered': False
+}
+
+def early_stopping():
+    """
+    Updates wether the algorithm should stop following
+    an early stopping implementation.
+    """
+    global es_params
+
+    val = val_accuracy.result()
+
+    if val - es_params['prev_val_acc'] >= es_params['min_val_increment']:
+        es_params['prev_val_acc'] = val
+        es_params['evals_without_increment'] = 0
+    else:
+        es_params['evals_without_increment'] += 1
+
+    es_params['early_stopping_triggered'] = \
+        es_params['evals_without_increment'] >= \
+            es_params['max_evals_without_incr']
 
 # - Training history, for metrics
 history = dict(loss=[], acc=[], val_loss=[], val_acc=[])
@@ -291,6 +319,11 @@ for epoch in range(args.epochs):
                 val_accuracy.result()
             )
             logger.info(msg)
+
+            early_stopping()
+            if es_params['early_stopping_triggered']:
+                logger.info('Early stopping triggered.')
+                break
             
     history['loss'].append(train_loss.result().numpy())
     history['acc'].append(train_accuracy.result().numpy())
@@ -299,6 +332,10 @@ for epoch in range(args.epochs):
     history['val_acc'].append(val_accuracy.result().numpy())
 
     logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+
+    if es_params['early_stopping_triggered']:
+        logger.info('That was the last epoch due to early stopping.')
+        break
 
 # - Log history
 log.log_history(log_folder, history)
