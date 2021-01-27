@@ -22,16 +22,24 @@ Different learning rate behaviour: https://console.paperspace.com/latexrec/proje
 
 ### Im2latex first official day (wednesday night)
 
-1. Vanilla + no remove_ambiguities + no other options: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/e4lyz6tux4beh/jobs/jmokc79qd8kk4/logs
+All of these experiments run 3 epochs and early stopping with 0.005 min val_acc increment in 5 evaluations unless stated otherwise.
 
-2. Vanila + WITH remove_ambiguities + no other options: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/e5ayftcdj63zj/jobs/js93x30o1p17jo/logs
+1. Vanilla + no remove_ambiguities + no other options: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/esm3wd5ct5wznb/jobs/jsjmbmp1nmkgkr/logs
+
+2. Vanila + WITH remove_ambiguities + no other options: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/ev0kliwo7ig7n/jobs/js4yitc5qd5y3f/logs
 
 (At this point in time we reason why remove_ambiguities is awesome and use it everywhere)
 
 In parallel:
 
-3a. Test Fast Attention:
+3a. Test Fast Attention: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/eaipoouvxu51/jobs/jsbacz6zazoftx/logs
 
-3b. Test Resnet: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/er4fmq7iep807
+3b. Test Resnet: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/er44mwm6f93lm
 
-3c. Test 2d positional encoding:
+3c. Test 2d positional encoding: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/essvdxud3iune6/jobs/jsaibfq0sjoa57/logs
+
+For these 2 experiments we reduce min val_acc increment to 0.0001 in 10 evaluations, and epochs to 5:
+
+- Big boy: Fast Attention + ResNet + Positional Encoding 2d: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/es1xpacplbe75a/jobs/jglgq6cp4q0qx/logs
+
+- Bigger boy: num_layers 1->4, num_heads 1->4, depth 16->32: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/esysqdw6apzohk

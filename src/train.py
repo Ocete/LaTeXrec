@@ -276,9 +276,9 @@ def evaluate():
 logger.info('Initializing early stop params')
 es_params = { 
     'prev_val_acc': 0,
-    'min_val_increment': 0.005,
+    'min_val_increment': 0.005, # 0.0001,
     'evals_without_increment': 0,
-    'max_evals_without_incr': 5,
+    'max_evals_without_incr': 5, # 10
     'early_stopping_triggered': False
 }
 
