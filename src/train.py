@@ -176,7 +176,10 @@ model = transformer.Transformer(num_layers,
 # Learning rate schedule, optimizer and optimizer parameters follows Vaswani et
 # al. (https://arxiv.org/abs/1706.03762).
 # TODO: make these parameters configurable
-lr = optimization.VaswaniSchedule(d_model)
+if args.lr_schedule == 'vaswani':
+    lr = optimization.VaswaniSchedule(d_model)
+elif args.lr_schedule == 'recurrent-vaswani':
+    lr = optimization.RecurrentVaswaniSchedule(d_model)
 optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
                                      beta_1=0.9,
                                      beta_2=0.98,
@@ -273,7 +276,7 @@ def evaluate():
 logger.info('Initializing early stop params')
 es_params = { 
     'prev_val_acc': 0,
-    'min_val_increment': 0.001,
+    'min_val_increment': 0.005,
     'evals_without_increment': 0,
     'max_evals_without_incr': 5,
     'early_stopping_triggered': False
@@ -327,18 +330,19 @@ for epoch in range(args.epochs):
                 val_accuracy.result()
             )
             logger.info(msg)
+            
+            history['loss'].append(train_loss.result().numpy())
+            history['acc'].append(train_accuracy.result().numpy())
+            
+            history['val_loss'].append(val_loss.result().numpy())
+            history['val_acc'].append(val_accuracy.result().numpy())
+
 
             early_stopping()
             if es_params['early_stopping_triggered']:
                 logger.info('Early stopping triggered.')
                 break
             
-    history['loss'].append(train_loss.result().numpy())
-    history['acc'].append(train_accuracy.result().numpy())
-    
-    history['val_loss'].append(val_loss.result().numpy())
-    history['val_acc'].append(val_accuracy.result().numpy())
-
     logger.info('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
 
     if es_params['early_stopping_triggered']:

@@ -159,7 +159,7 @@ training_group.add_argument(
 
 training_group.add_argument(
     '--lr-schedule',
-    choices=['vaswani', 'constant', 'cyclical'],
+    choices=['vaswani', 'recurrent-vaswani', 'constant', 'cyclical'],
     required=True,
     help='Learning rate schedule'
 )
