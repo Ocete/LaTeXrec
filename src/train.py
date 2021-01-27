@@ -170,8 +170,8 @@ model = transformer.Transformer(num_layers,
 # TODO: make these parameters configurable
 if args.lr_schedule == 'vaswani':
     lr = optimization.VaswaniSchedule(d_model)
-elif args.lr_schedule == 'vaswani-recurrent':
-    lr.optimization.RecurrentVaswaniSchedule(d_model)
+elif args.lr_schedule == 'recurrent-vaswani':
+    lr = optimization.RecurrentVaswaniSchedule(d_model)
 optimizer = tf.keras.optimizers.Adam(learning_rate=lr,
                                      beta_1=0.9,
                                      beta_2=0.98,
