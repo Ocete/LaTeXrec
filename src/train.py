@@ -1,6 +1,7 @@
 import cli_arguments
 import conv_encoder
 import datasets
+import latexrec_datasets
 import log
 import masks
 import optimization
@@ -37,22 +38,22 @@ remove_ambiguities = args.remove_ambiguities == 'yes'
 logger.info('Loading data')
 
 if args.dataset == 'im2latex':
-    train_df, _ = datasets.load_im2latex_dataset(remove_ambiguities)
-    image_dir = datasets.get_paths(1)[1]
+    train_df, _ = latexrec_datasets.load_im2latex_dataset(remove_ambiguities)
+    image_dir = latexrec_datasets.get_paths(1)[1]
 elif args.dataset == 'toy_50k':
-    train_df, _ = datasets.load_toy_dataset(remove_ambiguities)
-    image_dir = datasets.get_paths(0)[1]
+    train_df, _ = latexrec_datasets.load_toy_dataset(remove_ambiguities)
+    image_dir = latexrec_datasets.get_paths(0)[1]
 
 # - If 'samples' is an argument, take only those many samples
 if hasattr(args, 'samples') and args.samples is not None:
     train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects
-train_df, val_df = datasets.split_in_train_and_val(train_df)
+train_df, val_df = latexrec_datasets.split_in_train_and_val(train_df)
 
-train_dataset = datasets.LaTeXrecDataset(
+train_dataset = latexrec_datasets.LaTeXrecDataset(
     train_df, image_dir)
-val_dataset = datasets.LaTeXrecDataset(
+val_dataset = latexrec_datasets.LaTeXrecDataset(
     val_df, image_dir)
 
 # - Filter images that are too wide
@@ -71,7 +72,7 @@ train_dataset = train_dataset\
         padded_shapes=([-1, -1, 1], [-1]),
         padding_values=(
             tf.constant(1, dtype=tf.uint8),
-            tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+            tf.constant(latexrec_datasets.LaTeXrecDataset.alph_size+1,
                         dtype=tf.float32)
         )
     ).prefetch(tf.data.AUTOTUNE)
@@ -82,7 +83,7 @@ val_dataset = val_dataset\
         padded_shapes=([-1, -1, 1], [-1]),
         padding_values=(
             tf.constant(1, dtype=tf.uint8),
-            tf.constant(datasets.LaTeXrecDataset.alph_size+1,
+            tf.constant(latexrec_datasets.LaTeXrecDataset.alph_size+1,
                         dtype=tf.float32)
         )
     ).prefetch(tf.data.AUTOTUNE)
@@ -97,7 +98,7 @@ maximum_position_input = 5000
 # This is the maximum allowed length of a target sequence.
 maximum_position_target = args.maximum_target_length
 # Size of the target vocabulary, plus 2 for start and end tokens.
-target_vocab_size = datasets.LaTeXrecDataset.alph_size+2
+target_vocab_size = latexrec_datasets.LaTeXrecDataset.alph_size+2
 
 # For 2d positional encoding: set height and width. Width
 # must be the maximum size of a picture, hardcoded for now
@@ -210,7 +211,13 @@ train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
 )
 
 val_loss = tf.keras.metrics.Mean(name='val_loss')
-val_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='val_accuracy')
+val_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
+    name='val_accuracy'
+)
+
+bleu_metric = datasets.load_metric('bleu')
+train_bleu = 0
+val_bleu = 0
 
 # - Functions implementing: loss, training step and evaluation
 
@@ -228,7 +235,7 @@ def loss_function(real, pred, loss_object):
     return tf.reduce_mean(loss_)
 
 
-def train_step(inp, tar):
+def train_step(inp, tar, evaluate_step):
     """
     A training step on a batch.
     """
@@ -247,8 +254,11 @@ def train_step(inp, tar):
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    train_loss(loss)
-    train_accuracy(tar_real, predictions)
+    if evaluate_step:
+        train_loss(loss)
+        train_accuracy(tar_real, predictions)
+        train_bleu = bleu_metric.compute(predictions=predictions,
+                                         references=tar_real)
 
 def evaluate():
     """
@@ -269,6 +279,10 @@ def evaluate():
         loss = loss_function(tar_real, predictions, val_loss_object)
         val_loss(loss)
         val_accuracy(tar_real, predictions)
+
+        val_bleu = bleu_metric.compute(predictions=predictions,
+                                       references=tar_real)
+
 
     ckpt_manager.save()
 
@@ -313,21 +327,25 @@ for epoch in range(args.epochs):
     train_accuracy.reset_states()
 
     for batch, (inp, tar) in enumerate(train_dataset):
-        train_step(inp, tar)
+        evaluate_step = batch % 50 == 0
+        train_step(inp, tar, evaluate_step)
 
-        if batch % 50 == 0:
+        if evaluate_step:
             evaluate()
 
             msg = ('Epoch {}\tbatch {}\t' +
                    'loss {:.4f}\taccuracy {:.4f}\t' +
-                   'val. loss {:.4f}\tval. acc. {:.4f}')\
+                   'val. loss {:.4f}\tval. acc. {:.4f}' +
+                   'bleu: {:.4f}\t val. bleu: {:.4f}')\
                 .format(
                 epoch + 1,
                 batch,
                 train_loss.result(),
                 train_accuracy.result(),
                 val_loss.result(),
-                val_accuracy.result()
+                val_accuracy.result(),
+                train_bleu,
+                val_bleu
             )
             logger.info(msg)
             
