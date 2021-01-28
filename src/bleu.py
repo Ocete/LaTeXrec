@@ -122,4 +122,4 @@ def bleu_score(predictions, labels):
   print(type(labels_np))
 
   bleu = tf.py_function(compute_bleu, (labels_np, predictions_np), tf.float32)
-  return bleu, tf.constant(1.0)
+  return bleu

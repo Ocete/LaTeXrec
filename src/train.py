@@ -254,6 +254,7 @@ def train_step(inp, tar, evaluate_step):
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
+    global train_bleu
     if evaluate_step:
         train_loss(loss)
         train_accuracy(tar_real, predictions)
@@ -280,6 +281,7 @@ def evaluate():
         val_loss(loss)
         val_accuracy(tar_real, predictions)
 
+        global val_bleu
         val_bleu = bleu_score(predictions=predictions,
                               labels=tar_real)
 
