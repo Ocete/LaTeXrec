@@ -114,12 +114,9 @@ def bleu_score(predictions, labels):
   predictions = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
 
   # Convert the outputs and labels to a [batch_size, input_length] 
-  # tensor, and convert them to numpy arrays.
-  predictions_np = tf.squeeze(predictions).numpy()
-  labels_np = tf.squeeze(labels).numpy()
+  # tensor.
+  predictions_np = tf.squeeze(predictions)
+  labels_np = tf.squeeze(labels)
 
-  print(type(predictions_np))
-  print(type(labels_np))
-
-  bleu = tf.py_function(compute_bleu, (labels_np, predictions_np), tf.float32)
+  bleu = tf.numpy_function(compute_bleu, (labels_np, predictions_np), tf.float32)
   return bleu
