@@ -43,7 +43,7 @@ cli_job_im2latex_wed_1:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 3 \
+		--epochs 2 \
 		--conv-encoder-epochs 2 \
 		--batch-size 32 \
 		--optimizer adam \
@@ -71,7 +71,7 @@ cli_job_im2latex_wed_2:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 3 \
+		--epochs 2 \
 		--conv-encoder-epochs 2 \
 		--batch-size 32 \
 		--optimizer adam \
@@ -99,7 +99,7 @@ cli_job_im2latex_wed_3a:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 3 \
+		--epochs 2 \
 		--conv-encoder-epochs 2 \
 		--batch-size 32 \
 		--optimizer adam \
@@ -127,7 +127,7 @@ cli_job_im2latex_wed_3b:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 3 \
+		--epochs 2 \
 		--conv-encoder-epochs 2 \
 		--batch-size 32 \
 		--optimizer adam \
@@ -155,7 +155,7 @@ cli_job_im2latex_wed_3c:
 		--conv-filters 32 \
 		--pretrain-conv-encoder no \
 		--maximum-target-length 200 \
-		--epochs 3 \
+		--epochs 2 \
 		--conv-encoder-epochs 2 \
 		--batch-size 32 \
 		--optimizer adam \
