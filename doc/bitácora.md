@@ -53,7 +53,7 @@ pena porque sean lo suficientemente relevantes:
   de `\cal` está deprecado y `\mathcal` es más general, utilizaremos este
   último, reajustando la sintaxis conforme sea necesario.
 
-# 3. Atención eficiente
+# 2. Atención eficiente
 
 Uno de los principales escollos que hemos encontrado ya desde el trabajo
 preliminar en este proyecto es el enorme consumo de memoria del modelo
@@ -69,3 +69,34 @@ junto con algunas características de las mismas.
 
 Hemos seleccionado, de entre las que permiten emplear un decodificador, la
 atención rápida mediante el mecanismo FAVOR+ (@choromanski_rethinking_2020).
+
+# 3. Lectura eficiente
+
+Una vez saltamos al dataset Im2latex encontramos el gran problema de que este
+no cabia por completo en memoria. De hecho, no cabía ni la mitad. De cara a
+implementar una solución escalable y eficiente a este problema creamos una clase
+LaTeXrecDataset que hereda de Dataset, de tensorflow. Esta clase nos permite
+leer las imágenes conformen nos hacen falta y, al mismo tiempo, quitarlas de
+memoria cuando dejan de hacerlo. Todo esto se procesa de forma automática y
+muy comodamente, además de permitirnos implementar 'prefetching'. Esto es,
+lectura anticipada de los datos antes de que hagan falta para accelerar el
+proceso. Todo esto está implementado en el archivo `datasets.py`.
+
+# 4. Añadir logging
+
+Añadimos un sencillo sistema de logging a distintos archivos. Esto hace que
+el trabajo con paperspace sea mucho más rápido en los posteriores experimentos.
+Dicho sistema se puede encontrar en el archivo `log.py`.
+
+# 5. Implementación de codificación posicional 2-dimensional
+
+
+
+# 6. Implementar métrica BLEU
+
+Hemos añadido la [métrica BLEU](https://en.wikipedia.org/wiki/BLEU) para
+evaluar de forma más intuitiva los resultados obtenidos. Esta métrica nos
+da una estimación de cuanto se parecen dos cadenas de tokens.
+
+Para ello nos hemos basado en
+[tensor2tensor](https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu_hook.py#L132). Nuestra implementación se encuentra en `bleu.py`.
