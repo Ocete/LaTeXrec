@@ -1,0 +1,254 @@
+%%%
+% Plantilla de Memoria
+% Modificación de una plantilla de Latex de Nicolas Diaz para adaptarla 
+% al castellano y a las necesidades de escribir informática y matemática%
+% Editada por: Mario Román
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thin Sectioned Essay
+% LaTeX Template
+% Version 1.0 (3/8/13)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original Author:
+% Nicolas Diaz (nsdiaz@uc.cl) with extensive modifications by:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PAQUETES Y CONFIGURACIÓN DEL DOCUMENTO
+%----------------------------------------------------------------------------------------
+
+%%% Configuración del papel.
+% microtype: Tipografía.
+% mathpazo: Usa la fuente Palatino.
+\documentclass[a4paper, 20pt, dvipsnames]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{mathpazo}
+
+% Indentación de párrafos para Palatino
+\setlength{\parindent}{0pt}
+  \parskip=8pt
+\linespread{1.05} % Change line spacing here, Palatino benefits from a slight increase by default
+
+
+%%% Castellano.
+% noquoting: Permite uso de comillas no españolas.
+% lcroman: Permite la enumeración con numerales romanos en minúscula.
+% fontenc: Usa la fuente completa para que pueda copiarse correctamente del pdf.
+\usepackage[spanish,es-noquoting,es-lcroman,es-tabla,,es-nodecimaldot]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fontenc}
+\selectlanguage{spanish}
+
+
+%%% Gráficos
+\usepackage{graphicx} % Required for including pictures
+\usepackage{wrapfig} % Allows in-line images
+\usepackage[usenames,dvipsnames]{color} % Coloring code
+%\usepackage{subcaption}
+\usepackage{subfig}
+\graphicspath{{./fig/}}
+\captionsetup{width=0.8\textwidth}
+
+%%% Matemáticas
+\usepackage{amsmath}
+\usepackage{physics} % para las derivadas parciales
+\usepackage[Symbol]{upgreek} %pi
+
+%%% Pseudocódigo
+\usepackage[htt]{hyphenat} % Permite salto de líneas en texttt
+\usepackage{algorithmicx}
+\usepackage[ruled]{algorithm}
+\usepackage{algpseudocode}
+
+\newcommand{\alg}{\texttt{algorithmicx}}
+\newcommand{\old}{\texttt{algorithmic}}
+\newcommand{\euk}{Euclid}
+\newcommand\ASTART{\bigskip\noindent\begin{minipage}[b]{0.5\linewidth}}
+\newcommand\ACONTINUE{\end{minipage}\begin{minipage}[b]{0.5\linewidth}}
+\newcommand\AENDSKIP{\end{minipage}\bigskip}
+\newcommand\AEND{\end{minipage}}
+
+
+%%% Tablas
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{booktabs}
+
+% Enlaces y colores
+\usepackage{hyperref}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{webgreen}{rgb}{0,0.5,0}
+\hypersetup{
+  colorlinks=true,
+  citecolor=RoyalBlue,
+  urlcolor=RoyalBlue,
+  linkcolor=RoyalBlue
+}
+
+%%% Código
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  %frame=single,
+  breaklines=true
+}
+
+%%% Gráficas
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+%%% Bibliografía
+\usepackage[backend=biber]{biblatex}
+\DefineBibliographyStrings{spanish}{
+  urlseen = {Accedido}
+}
+\addbibresource{citations.bib}
+
+
+\newcommand{\training}{\textit{training }}
+\newcommand{\test}{\textit{test }}
+\newcommand{\RF}{\textit{Random Forest }}
+
+\DeclareMathOperator{\acc}{\texttt{accuracy}}
+
+%%% Subsubsection con letras
+\renewcommand{\thesubsubsection}{\thesubsection.\alph{subsubsection}}
+
+%%% Itemize, enumitem
+\usepackage{paralist}
+\usepackage{enumitem}
+
+\usepackage[section]{placeins}
+% \makeatletter
+% \AtBeginDocument{%
+%   \expandafter\renewcommand\expandafter\subsection\expandafter
+%     {\expandafter\@fb@secFB\subsection}%
+%   \newcommand\@fb@secFB{\FloatBarrier
+%     \gdef\@fb@afterHHook{\@fb@topbarrier \gdef\@fb@afterHHook{}}}%
+%   \g@addto@macro\@afterheading{\@fb@afterHHook}%
+%   \gdef\@fb@afterHHook{}%
+% }
+% \makeatother
+
+
+%%% Entornos personalizados
+\newenvironment{bloque}[1]
+{
+\begin{tabular}{|l|}
+ \multicolumn{1}{c}{\textbf{\large #1}} \\
+ \hline
+ \textbf{Capa/bloque} \\
+ \hline}
+{
+ \\\hline
+    \end{tabular}   
+}
+
+\newenvironment{modelo}[1]
+{
+\begin{tabular}{ |p{4cm}||p{1.5cm}|p{1.5cm}|  }
+ \multicolumn{3}{c}{\textbf{\large #1}} \\
+ \hline
+ \textbf{Capa/bloque} & \textbf{Entrada} & \textbf{Salida} \\
+ \hline}
+{
+ \\\hline
+    \end{tabular}   
+}
+
+%----------------------------------------------------------------------------------------
+%	TÍTULO
+%----------------------------------------------------------------------------------------
+% Configuraciones para el título.
+% El título no debe editarse aquí.
+\renewcommand{\maketitle}{
+  \begin{flushright} % Right align
+  
+  {\LARGE\@title} % Increase the font size of the title
+  
+  \vspace{50pt} % Some vertical space between the title and author name
+  
+  {\large\@author} % Author name
+  \\\@date % Date
+  \vspace{40pt} % Some vertical space between the author block and abstract
+  \end{flushright}
+}
+
+%% Título
+\title{\textbf{Título}\\ % Title
+Subtítulo} % Subtitle
+
+\author{\textsc{Autor1,\\Autor2} % Author
+\\{\textit{Universidad de Granada}}} % Institution
+
+\date{\today} % Date
+
+%-----------------------------------------------------------------------------------------
+%	DOCUMENTO
+%-----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%-----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%-----------------------------------------------------------------------------------------
+
+\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
+	
+	\raggedleft % Right align the title page
+	
+	\rule{1pt}{\textheight} % Vertical line
+	\hspace{0.05\textwidth} % Whitespace between the vertical line and title page text
+	\parbox[b]{0.8\textwidth}{ % Paragraph box for holding the title page text, adjust the width to move the title page left or right on the page
+		
+		{\Huge\bfseries Proyecto final:\\[0.5\baselineskip] Generación
+                  de \LaTeX a partir de imágenes
+                  \\[0.5\baselineskip]\\[2\baselineskip]} % Title
+		{\large\textit{Curso 2020/21}\\[0.5\baselineskip]Visión por computador\\[1.5\baselineskip] }% Subtitle or further description
+		{\Large\textsc{José Antonio Álvarez Ocete, Daniel Pozo Escalona}\\[1.5\baselineskip]danipozo@correo.ugr.es} % Author name, lower case for consistent small caps
+		
+		\vspace{0.4\textheight} % Whitespace between the title block and the publisher
+		
+		{\noindent \\[0.5\baselineskip] }\\[\baselineskip] % Publisher and logo
+	}
+
+\end{titlepage}
+
+%% Resumen (Descomentar para usarlo)
+%\renewcommand{\abstractname}{Resumen} % Uncomment to change the name of the abstract to something else
+%\begin{abstract}
+% Resumen aquí
+%\end{abstract}
+
+%% Palabras clave
+%\hspace*{3,6mm}\textit{Keywords:} lorem , ipsum , dolor , sit amet , lectus % Keywords
+%\vspace{30pt} % Some vertical space between the abstract and first section
+
+
+%% Índice
+{\parskip=2pt
+  \tableofcontents
+}
+\pagebreak
+
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\printbibliography
+\end{document}
