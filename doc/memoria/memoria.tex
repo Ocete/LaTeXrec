@@ -700,10 +700,56 @@ el mismo, nos permitirá aumentar el tamaño del batch estudiado para
 
 \subsection{Experimentos sobre Im2Latex}
 
-\subsubsection{Experimento inicial}
+\subsubsection{Experimento inicial sobre Im2Latex}
 \label{exp:1}
 
-% TODO: Observación interesante: no sobreajustamos tanto y da mejores resultados que en toy
+Para este primer experimento sobre la base de datos Im2Latex volvemos al modelo propuesto originalmente \ref{sec:model} junto con los parámetros comentados \ref{sec:sec:params} modificaciones adicionales. Los resultados obtenidos han sido los siguientes:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión & Precisión en validación & Pérdida & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		CNN Simple & 0.8695    & 0.8190                  & 0.6340  & 0.9014                & 8.33      
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/im2latex-1.pdf}
+\end{figure}
+
+Lo primero que observamos tras este experimento fue sin duda el alto valor de precisión
+en validación: 81.90\%. Este valor tiene aún más relevancia si lo comparamos con el valor
+obtenido en el experimento \ref{exp:toy1} de un 50.98\%. Cabría esperar que ante el aumento
+de complejidad de la gramática estudiada y las imágenes obtenidas el rendimiento del
+modelo fuese considerablemente inferior. Sin embargo, el resultado es exactamente el
+contrario. Podríamos pensar que puede deberse a que ante una gramática tan sencilla
+como la de Toy se produzca un tremendo sobreajuste. Aunque esto ocurre, no es la causa
+de su pobre valor de precisión, como ya se vió en su correspondiente análisis \ref{exp:toy1}.
+
+Nuestra teoría actual se basa en que el modelo aprende mucho mejor aunque tal cantidad
+y variedad de imágenes como presenta Im2Latex. Esto nos sugiere probar técnicas para
+aumentar el conjunto de datos (data augmentation). Sin embargo, no nos valdría con
+simplemente tomar subimágenes de los datos existentes ya las imágenes generados por
+\LaTeX{} se ajustan al texto en ellas, y el tomar subimágenes invalidaría el resultado
+esperado.
+
+Volvamos a los resultados del experimento. Como podemos ver en las gráficas, en este
+experimento hemos realizado unicamente dos epochs. Esto ya nos lleva a un tiempo de
+8.33 horas, por lo que no era posible realizar más. Hemos decidido evaluar el modelo
+entre épocas para tener datos más explicativos, ya que unicamente dos medidas no nos
+permitían obtener suficiente información.
+
+Fijándonos en la tabla podemos apreciar como vuelve a producirse sobreajuste: 86.95\%
+de precisión en entrenamiento frente a 81.90\% en validación. Sin embargo, este margen
+en considerablemente menor que el del 40\% que se producía sobre la base de datos sintética.
+
+Cabe destacar la repentina mejora en precisión durante el entrenamiento al terminar
+la primera época. Esto nos muestra como el modelo recuerda especialmente bien los
+datos proporcionados y puede indicar que entrenar sobre los mismo datos durante
+demasiadas epochs podría ser contraproducente. Como podemos ver en precisión en
+validación, 2 epochs no son suficiente para sobreajustarnos a los datos ya que el
+modelo sigue mejorando hasta el final.
 
 \subsubsection{Eliminar ambigüedades}
 \label{exp:2}
@@ -727,8 +773,12 @@ el mismo, nos permitirá aumentar el tamaño del batch estudiado para
 
 \subsubsection{Lattest boy (estudio sobre test)}
 
+\section{Conclusiones}
+
+% TODO: comentar la hipotesis del aumento de datos + sobreajuste antes repetidas epochs -> comentar posibles experimentos en esta dirección
 
 
+% TODO: recordatorio final: hablar de early stopping!
 
 
 
