@@ -59,7 +59,7 @@
 \usepackage[usenames,dvipsnames]{color} % Coloring code
 %\usepackage{subcaption}
 \usepackage{subfig}
-\graphicspath{{./fig/}}
+\graphicspath{{./../fig/}}
 \captionsetup{width=0.8\textwidth}
 
 %%% Matemáticas
@@ -117,7 +117,7 @@
 \DefineBibliographyStrings{spanish}{
   urlseen = {Accedido}
 }
-\addbibresource{citations.bib}
+\addbibresource{bibliography.bib}
 
 
 \newcommand{\training}{\textit{training }}
@@ -249,7 +249,10 @@ Subtítulo} % Subtitle
 
 \section{Introducción}
 
-Nuestro objetivo en este trabajo será desarrollar un modelo que, dada una imagen producida al compilar código \LaTeX{} asociado a una fórmula, prediga el código \LaTeX{} que fue utilizado para compilarla. Para ello utilizaremos un esquema codificador - decodificador utilizando transformers.
+Nuestro objetivo en este trabajo será desarrollar un modelo que, dada una imagen
+producida al compilar código \LaTeX{} asociado a una fórmula, prediga el código
+\LaTeX{} que fue utilizado para compilarla. Para ello utilizaremos un esquema
+codificador-decodificador utilizando \emph{transformers}.
 
 
 \section{Bases de datos utilizadas}
@@ -257,20 +260,34 @@ Nuestro objetivo en este trabajo será desarrollar un modelo que, dada una image
 
 Las bases de datos para el problema son:
 
-- \textbf{im2latex-100k} (@kanervisto\_anssi\_2016\_56198), y
-- \textbf{imlatex-170k} (@im2latex\_170k): contiene 65000 ejemplos, que se añaden a los 100000 de im2latex-100k.
-
+\begin{itemize}
+\item
+  \textsc{im2latex-100k} \cite{kanervisto_anssi_2016_56198}, y
+\item
+  \textsc{imlatex-170k} \cite{im2latex_170k}: contiene 65000 ejemplos, que se
+  añaden a los 100000 de im2latex-100k.
+\end{itemize}
 % TODO: revisar que (todas) las referencias están bien puestas.
 
-Ambas bases de datos contienen ambigüedad en los ejemplos, en forma de fórmulas o segmentos de fórmulas que, escritos de distinta forma, producen la misma imagen. Dedicaremos parte del tiempo del proyecto a diseñar formas de normalizar estos datos, para mejorar los resultados. Entraremos en detalle más adelante.
+Ambas bases de datos contienen ambigüedad en los ejemplos, en forma de fórmulas
+o segmentos de fórmulas que, escritos de distinta forma, producen la misma
+imagen. Dedicaremos parte del tiempo del proyecto a diseñar formas de normalizar
+estos datos, para mejorar los resultados. Entraremos en detalle más adelante.
 
-Por ello, las evaluaciones iniciales con modelos de referencia y las finales pueden no ser directamente comparables. Esto lo paliaremos de dos formas: con la base de datos sintética que introducimos a continuación, y evaluando los modelos de referencia en la base de datos normalizada. Además, hay que tener en cuenta que lo relevante en este problema es dar expresiones \LaTeX{} que produzcan las imágenes que se proporcionen al modelo, más que estas coincidan con unas prefijadas.
+Por ello, las evaluaciones iniciales con modelos de referencia y las finales
+pueden no ser directamente comparables. Esto lo paliaremos de dos formas: con la
+base de datos sintética que introducimos a continuación, y evaluando los modelos
+de referencia en la base de datos normalizada. Además, hay que tener en cuenta
+que lo relevante en este problema es dar expresiones \LaTeX{} que produzcan las
+imágenes que se proporcionen al modelo, más que estas coincidan con unas
+prefijadas.
 
-En la práctica, utilizaremos unicamente im2latex\_170k, ya que contiene a la anterior.
+En la práctica, utilizaremos únicamente \textsc{im2latex-170k}, ya que contiene
+a la anterior.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics{fig/ejemplo-im2latex.pdf}
+	\includegraphics{../fig/ejemplo-im2latex.pdf}
 	\caption{Tres muestras de im2latex-170k.}
 	\label{fig:muestras-1}
 \end{figure}
@@ -278,15 +295,20 @@ En la práctica, utilizaremos unicamente im2latex\_170k, ya que contiene a la an
 
 \subsection{Base de datos sintética}
 
-Lo primero que hemos hecho ha sido crear una base de datos similar a las que pretendemos tratar, en la que las fórmulas han sido generadas a partir de una gramática relativamente sencilla, que contiene una cantidad pequeña de símbolos.
+Lo primero que hemos hecho ha sido crear una base de datos similar a las que
+pretendemos tratar, en la que las fórmulas han sido generadas a partir de una
+gramática relativamente sencilla, que contiene una cantidad pequeña de símbolos.
 
-Hemos generado 50.000 ejemplos distintos. Los guiones Python que hemos escrito a tal efecto permiten cambiar la gramática y generar conjuntos de datos con cantidades arbitrarias de ejemplos únicos.
+Hemos generado 50.000 ejemplos distintos. Los guiones Python que hemos escrito a
+tal efecto permiten cambiar la gramática y generar conjuntos de datos con
+cantidades arbitrarias de ejemplos únicos.
 
-Además, esta base de datos puede ser útil para evaluar cambios a la arquitectura o hiperparámetros de forma menos costosa.
+Además, esta base de datos puede ser útil para evaluar cambios a la arquitectura
+o hiperparámetros de forma menos costosa.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics{fig/ejemplo-sintetica.pdf}
+	\includegraphics{../fig/ejemplo-sintetica.pdf}
 	\caption{Muestras de la base de datos sintética.}
 	\label{fig:muestras-sintetica}
 \end{figure}
@@ -296,106 +318,212 @@ Además, esta base de datos puede ser útil para evaluar cambios a la arquitectu
 
 El modelo que proponemos es el siguiente:
 
-- Un codificador, formado por una red convolucional, seguido por un modelo \emph{transformer}.
+\begin{itemize}
+\item
+  Un codificador, formado por una red convolucional, seguido por un modelo
+  \emph{transformer}.
 
-- Un decodificador \emph{transformer}, que emplea atención multi-cabezal sobre la salida del codificador y sobre una secuencia potencialmente incompleta, para predecir el siguiente token de la fórmula. Es decir, es un modelo de lenguaje condicional que modela $p(x_t | V, x_1, ..., x_{t-1})$, donde $V$ es la salida del codificador.
+\item
+  Un decodificador \emph{transformer}, que emplea atención multi-cabezal sobre
+  la salida del codificador y sobre una secuencia potencialmente incompleta,
+  para predecir el siguiente token de la fórmula. Es decir, es un modelo de
+  lenguaje condicional que modela $p(x_t | V, x_1, ..., x_{t-1})$, donde $V$ es
+  la salida del codificador.
+\end{itemize}
 
-Utilizaremos una red convolucional para obtener las características de las imágenes de entrada. Este vector de características será la entrada para el modelo codificador-decodificador.
+Utilizaremos una red convolucional para obtener las características de las
+imágenes de entrada. Este vector de características será la entrada para el
+modelo codificador-decodificador.
 
-Aunque posteriormente el modelo de referencia que se presenta a continuación sufrirá ciertas variaciones, el esquema general no variará. Este modelo posee un codificador convolucional con tres capas Conv-BN-ELU-MaxPooling y una sola capa de atención en el codificador y en el decodificador.
+Aunque posteriormente el modelo de referencia que se presenta a continuación
+sufrirá ciertas variaciones, el esquema general no variará. Este modelo posee un
+codificador convolucional con tres capas Conv-BN-ELU-MaxPooling y una sola capa
+de atención en el codificador y en el decodificador.
 
 % TODO: quitar esta proxima linea, que hace que no salga el modelo.
-\iffalse
+% \iffalse
 \begin{figure}[h]
 	\centering
 	
 	\subfloat{
-		\begin{modelblock}{Codificador convolucional}
+		\begin{bloque}{Codificador convolucional}
 			Conv2D-BN-ELU(64 filtros) \\
 			MaxPooling2D(2$\times$2) \\
 			Conv2D-BN-ELU(64 filtros) \\
 			MaxPooling2D(2$\times$2) \\
 			Conv2D-BN-ELU(64 filtros) \\
 			MaxPooling2D(2$\times$2)
-		\end{modelblock}
+		\end{bloque}
 	}
 	\subfloat{
-		\begin{modelblock}{Codificador \textit{transformer}}
+		\begin{bloque}{Codificador \textit{transformer}}
 			Codif. conv. \\
 			Codificación de posición \\
 			Dropout \\
 			Capa de codificador
-		\end{modelblock}
+		\end{bloque}
 	}
 	\subfloat{
-		\begin{modelblock}{Decodificador \textit{transformer}}
+		\begin{bloque}{Decodificador \textit{transformer}}
 			Embedding \\
 			Codificación de posición \\
 			Dropout \\
 			Capa de decodificador
-		\end{modelblock}
+		\end{bloque}
 	}
 	
 	\caption{Bloques del modelo de referencia.}
 	\label{fig:bloques-referencia}
 \end{figure}
-\fi
+% \fi
+
 \section{Procesamiento de los datos}
 
-Para las imágenes, el procesamiento que realizamos es redimensionarlas a una altura común, manteniendo la relación de aspecto. Tras esto, eliminamos los ejemplos con imágenes demasiado grandes para ser procesadas por el modelo, debido al coste cuadrático del mecanismo de atención.
+Para las imágenes, el procesamiento que realizamos es redimensionarlas a una
+altura común, manteniendo la relación de aspecto. Tras esto, eliminamos los
+ejemplos con imágenes demasiado grandes para ser procesadas por el modelo,
+debido al coste cuadrático del mecanismo de atención.
 
-Para las fórmulas, utilizamos el [\emph{tokenizer} de TensorFlow](https://www.tensorflow.org/api\_docs/python/tf/keras/preprocessing/text/Tokenizer) para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que depende del conjunto de datos. Esto nos permite codificar las fórmulas numéricamente.
+Para las fórmulas, utilizamos el \emph{tokenizer} de TensorFlow \cite{tokenizer}
+para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
+depende del conjunto de datos. Esto nos permite codificar las fórmulas
+numéricamente.
 
 
 \subsection{Lectura eficiente}
 
-Una vez comenzamos a trabajar con la base de datos im2latex descubrimos que ésta no cabía por completo en memoria. De hecho, no cabía ni la un cuarto. De cara a implementar una solución escalable y eficiente a este problema creamos una clase LaTeXrecDataset que hereda de Dataset, de Tensorflow. Esta clase nos permite leer las imágenes conformen el modelo las necesita y, al mismo tiempo, eliminarlas de memoria cuando dejan de hacerlo. Todo esto se procesa de forma automática y muy cómodamente, además de permitirnos implementar \emph{prefetching}. Esto es, lectura anticipada de los datos antes de que hagan falta para acelerar el proceso.
+Una vez comenzamos a trabajar con la base de datos \textsc{im2latex-170K}
+descubrimos que esta no cabía por completo en memoria. De hecho, no cabía ni una
+parte. De cara a implementar una solución escalable y eficiente a este problema
+creamos una clase, \texttt{LaTeXrecDataset}, que hereda de
+\texttt{tf.data.Dataset} \cite{tf_dataset}, de TensorFlow. Esta clase nos
+permite leer las imágenes conformen el modelo las necesita y, al mismo tiempo,
+eliminarlas de memoria cuando dejan de hacerlo. Todo esto se procesa de forma
+automática y muy cómodamente, además de permitirnos implementar
+\emph{prefetching}. Esto es, lectura anticipada de los datos antes de que hagan
+falta para acelerar el proceso.
 
-% TODO: no sé si el logging merece la pena comentarlo. Nos llevó su tiempo (tampoco tanto, pero algo) y le añade calidad al código, pero no sé si Nicolás lo verá relevante sinceramente.
+% TODO: no sé si el logging merece la pena comentarlo. Nos llevó su tiempo
+% (tampoco tanto, pero algo) y le añade calidad al código, pero no sé si Nicolás
+% lo verá relevante sinceramente.
 
-Añadimos un sencillo y cómodo sistema de logging a distintos archivos, dependiendo de la información de los mensajes. % TODO completar si decidimos dejarlo.
+Añadimos un sencillo y cómodo sistema de \emph{logging} a distintos archivos,
+dependiendo de la información de los
+mensajes. % TODO completar si decidimos dejarlo.
 
 
 \section{Características de desarrollo}
 
 % TODO: se requiere urgentemente un nuevo nombre para esta sección porque vaya tela
 
-En esta sección describimos las distintas características implementadas sobre el modelo inicial descrito con anterioridad. Los resultados de las mismas se describen en la sección de experimentos.
+En esta sección describimos las distintas características implementadas sobre el
+modelo inicial descrito con anterioridad. Los resultados de las mismas se
+describen en la sección de experimentos.
 
 
 \subsection{Eliminación de ambigüedades}
 
-Como ya discutimos en la \hyperref[sec:datasets]{sección de bases de datos}, en este problema encontramos ambigüedad en la salida de los datos. Distintas expresiones $LaTeX$ generar la misma salida o una casi indistiguible en la imagen. Por ejemplo, \emph{\textbackslash sin} y \emph{\textbackslash operatorname\{sin\}}: $\sin(x)$ frente a $\operatorname{sin}(x)$.
+Como ya discutimos en la sección \ref{sec:datasets}, en este problema
+encontramos ambigüedad en la salida de los datos. Distintas expresiones $LaTeX$
+generar la misma salida o una casi indistinguible en la imagen. Por ejemplo,
+\emph{\textbackslash sin} y \emph{\textbackslash operatorname\{sin\}}: $\sin(x)$
+frente a $\operatorname{sin}(x)$.
 
-Esto hace que el aprendizaje sea  más difícil. El primer cambio que hicimos tras tener un modelo funcional fue eliminar este tipo de ambigüedades en los datos. Cabe aclarar que aunque estemos alterando los datos, la imagen \LaTeX{} obtenida es exactamente la misma en todos estos casos.
+Esto hace que el aprendizaje sea más difícil. El primer cambio que hicimos tras
+tener un modelo funcional fue eliminar este tipo de ambigüedades en los
+datos. Cabe aclarar que aunque estemos alterando los datos, la imagen \LaTeX{}
+obtenida es exactamente la misma en todos estos casos.
 
-Para ello, utilizamos el [\emph{tokenizer} de TensorFlow](https://www.tensorflow.org/api\_docs/python/tf/keras/preprocessing/text/Tokenizer) para generar una lista de tokens de las primeras 60.000 imagénes en la que basarnos. Estudiando esta lista hemos decidido modificar las siguientes ambigüedades, buscando un balance entre implementación sencilla y que merezca la pena porque sean lo suficientemente relevantes:
+Para ello, utilizamos el \emph{tokenizer} de TensorFlow \cite{tokenizer} para
+generar una lista de tokens de las primeras 60.000 imágenes en la que
+basarnos. Estudiando esta lista hemos decidido modificar las siguientes
+ambigüedades, buscando un balance entre implementación sencilla y que merezca la
+pena porque sean lo suficientemente relevantes:
 
-- Los operadores con nombre más famosos (como seno y máximo), tienen un comando particular en \LaTeX{}: \emph{\textbackslash sin}, y \emph{\textbackslash max}. Utilizaremos estos comandos en vez de los respectivo \emph{\textbackslash operatorname\{sin\}} y \emph{\textbackslash operatorname\{max\}}, siempre que se pueda. Aplicaremos esta misma sustitución para los comandos con un asterisco: \emph{\textbackslash operatorname* \{sin\}}. La lista completa de operadores a  la que le aplicamos essta sustitución es la siguiente: `\emph{\textbackslash sin}, \emph{\textbackslash cos}, \emph{\textbackslash tan}, \emph{\textbackslash arcsin}, \emph{\textbackslash arccos}, \emph{\textbackslash arctan}, \emph{\textbackslash sinh}, \emph{\textbackslash cosh}, \emph{\textbackslash tanh}, \emph{\textbackslash max}, \emph{\textbackslash min}, \emph{\textbackslash exp}, \emph{\textbackslash log}, \emph{\textbackslash ln}, \emph{\textbackslash sup}, \emph{\textbackslash inf}, \emph{\textbackslash lim}, \emph{\textbackslash dim}, \emph{\textbackslash deg}, \emph{\textbackslash ker}, \emph{\textbackslash cot}, \emph{\textbackslash Pr}, \emph{\textbackslash lg}, \emph{\textbackslash arg}, \emph{\textbackslash det}, \emph{\textbackslash vol}.
+\begin{itemize}
+\item
+  Los operadores con nombre más famosos (como seno y máximo), tienen un
+  comando particular en \LaTeX{}: \emph{\textbackslash sin}, y
+  \emph{\textbackslash max}. Utilizaremos estos comandos en vez de los
+  respectivo \emph{\textbackslash operatorname\{sin\}} y \emph{\textbackslash
+    operatorname\{max\}}, siempre que se pueda. Aplicaremos esta misma
+  sustitución para los comandos con un asterisco: \emph{\textbackslash
+    operatorname* \{sin\}}. La lista completa de operadores a la que le
+  aplicamos essta sustitución es la siguiente: `\emph{\textbackslash sin},
+  \emph{\textbackslash cos}, \emph{\textbackslash tan}, \emph{\textbackslash
+    arcsin}, \emph{\textbackslash arccos}, \emph{\textbackslash arctan},
+  \emph{\textbackslash sinh}, \emph{\textbackslash cosh}, \emph{\textbackslash
+    tanh}, \emph{\textbackslash max}, \emph{\textbackslash min},
+  \emph{\textbackslash exp}, \emph{\textbackslash log}, \emph{\textbackslash
+    ln}, \emph{\textbackslash sup}, \emph{\textbackslash inf},
+  \emph{\textbackslash lim}, \emph{\textbackslash dim}, \emph{\textbackslash
+    deg}, \emph{\textbackslash ker}, \emph{\textbackslash cot},
+  \emph{\textbackslash Pr}, \emph{\textbackslash lg}, \emph{\textbackslash arg},
+  \emph{\textbackslash det}, \emph{\textbackslash vol}.
 
-- El comando \emph{\textbackslash prime} se utiliza en \LaTeX{} para mostar una comilla grande. En caso de utilizarse como exponente (\emph{ \textbackslash \textasciicircum \{ \textbackslash prime \}}) tiene la misma representación gráfica que una comilla simple: \textbf{'}. Sustituiremos la expresión: `\emph{ \textbackslash \textasciicircum \{ \textbackslash prime \}}` por '.
+\item
+  El comando \emph{\textbackslash prime} se utiliza en \LaTeX{} para mostrar
+  una comilla grande. En caso de utilizarse como exponente (\emph{
+    \textbackslash \textasciicircum \{ \textbackslash prime \}}) tiene la misma
+  representación gráfica que una comilla simple: \textbf{'}. Sustituiremos la
+  expresión: `\emph{ \textbackslash \textasciicircum \{ \textbackslash prime
+    \}}` por '.
 
-- Los símbolos de llaves `\{` y `\}` se pueden escribir también como `\emph{ \textbackslash brace }` y `\emph{ \textbackslash rbrace }` respectivamente. Los sustituiremos por la versión más corta que es, además, más general ya que se puede utilizar tanto en modo texto como en modo matemáticas.
+\item
+  Los símbolos de llaves `\{` y `\}` se pueden escribir también como `\emph{
+    \textbackslash brace }` y `\emph{ \textbackslash rbrace }`
+  respectivamente. Los sustituiremos por la versión más corta que es, además,
+  más general ya que se puede utilizar tanto en modo texto como en modo
+  matemáticas.
 
-- El símbolo de la daga se puede escribir en $LaTex$ utilizando tanto `\emph{ \textbackslash dagger }` como `\emph{ \textbackslash dag }`. Aunque este símbolo apenas aparece en nuestras fórmulas, añadir esta sustitución es una línea extra que no añade complejidad ninguna. Utilizaremos su versión más corta.
+\item
+  El símbolo de la daga se puede escribir en $LaTex$ utilizando tanto `\emph{
+    \textbackslash dagger }` como `\emph{ \textbackslash dag }`. Aunque este
+  símbolo apenas aparece en nuestras fórmulas, añadir esta sustitución es una
+  línea extra que no añade complejidad ninguna. Utilizaremos su versión más
+  corta.
 
-- Finalmente, la tipografía aplicada al utilizar `\emph{\textbackslash cal}` y `\emph{\textbackslash mathcal}` es exactamente la misma aunque su sintaxis es distinta. `\emph{\textbackslash cal}` se utiliza para palabras o letras sueltas: `\emph{\textbackslash prime} A`; mientras que `\emph{\textbackslash mathcal}` se utiliza para expresiones más complejas: `\emph{\textbackslash mathcal} \{ sin \textasciicircum \{ 2 \} ( x ) \}`. Puesto que el uso de `\emph{\textbackslash cal}` está deprecado y `\emph{\textbackslash mathcal}` es más general, utilizaremos este último, reajustando la sintaxis conforme sea necesario.
-
+\item
+  Finalmente, la tipografía aplicada al utilizar `\emph{\textbackslash cal}` y
+  `\emph{\textbackslash mathcal}` es exactamente la misma aunque su sintaxis es
+  distinta. `\emph{\textbackslash cal}` se utiliza para palabras o letras
+  sueltas: `\emph{\textbackslash prime} A`; mientras que `\emph{\textbackslash
+    mathcal}` se utiliza para expresiones más complejas: `\emph{\textbackslash
+    mathcal} \{ sin \textasciicircum \{ 2 \} ( x ) \}`. Puesto que el uso de
+  `\emph{\textbackslash cal}` está deprecado y `\emph{\textbackslash mathcal}`
+  es más general, utilizaremos este último, reajustando la sintaxis conforme sea
+  necesario.
+\end{itemize}
 
 \subsection{Atención eficiente}
 
-Uno de los principales escollos que hemos encontrado ya desde el trabajo preliminar en este proyecto es el enorme consumo de memoria del modelo \emph{transformer}. Esto se debe a que, en cada capa de atención, se ha de calcular la matriz de atención, de tamaño cuadrático en la longitud de la secuencia procesada. En el caso de las características provenientes de la imagen, esta secuencia puede alcanzar longitud 500.
+Uno de los principales escollos que hemos encontrado ya desde el trabajo
+preliminar en este proyecto es el enorme consumo de memoria del modelo
+\emph{transformer}. Esto se debe a que, en cada capa de atención, se ha de
+calcular la matriz de atención, de tamaño cuadrático en la longitud de la
+secuencia procesada. En el caso de las características provenientes de la
+imagen, esta secuencia puede alcanzar longitud 500.
 
-Recientemente, se han propuesto múltiples alternativas para aproximar el mecanismo de atención de forma más eficiente (@tay2020efficient). En la tabla 1 de este artículo de revisión se encuentran listadas todas las alternativas, junto con algunas características de las mismas.
+Recientemente, se han propuesto múltiples alternativas para aproximar el
+mecanismo de atención de forma más eficiente \cite{tay2020efficient}. En la
+tabla 1 de este artículo de revisión se encuentran listadas todas las
+alternativas, junto con algunas características de las mismas.
 
-Hemos seleccionado, de entre las que permiten emplear un decodificador, la atención rápida mediante el mecanismo FAVOR+ (@choromanski\_rethinking\_2020), la hemos implementado y probado.
+Hemos seleccionado, de entre las que permiten emplear un decodificador, la
+atención rápida mediante el mecanismo FAVOR+ \cite{choromanski_rethinking_2020},
+la hemos implementado y probado.
 
 
 \subsection{Codificación posicional 2-dimensional}
 
-La capa de \emph{self attention} en la que se basan los bloques transformers sigue un modelo de conexión `todos con todos`, por lo que pierde la información posicional de los elementos que recibe. Es por ello que se añade codificación posicional, para añadir artificalmente dicha información de la posición de cada palabra.
+La capa de \emph{self attention} en la que se basan los bloques \textit{transformers}
+sigue un modelo de conexión ``todos con todos'', por lo que pierde la información
+posicional de los elementos que recibe. Es por ello que se añade codificación
+posicional, para añadir artificialmente dicha información de la posición de cada
+palabra.
 
-% TODO: No estoy nada seguro de querer poner esta foto y essta explicación creo que anda un poco cogida con pinzas, una revisión técnica no le viene mal.
+% TODO: No estoy nada seguro de querer poner esta foto y essta explicación creo
+% que anda un poco cogida con pinzas, una revisión técnica no le viene mal.
 
 \begin{figure}[H]
 	\centering
@@ -406,16 +534,27 @@ La capa de \emph{self attention} en la que se basan los bloques transformers sig
 % TODO: Añadir a las refs:
 % https://www.youtube.com/watch?v=oUhGZMCTHtI\&list=PLIXJ-Sacf8u60G1TwcznBmK6rEL3gmZmV&index=2
 
-En nuestro caso particular, añadimos esa codificación posicional también a la salida de nuestra red convolucional con las características de la imagen obtenidas. A pesar de que dicha imagen tenga dos dimensiones, se aplana en una única dimensión antes de añadirle esta información, perdiendo la posición relativa en la imagen en el proceso.
+En nuestro caso particular, añadimos esa codificación posicional también a la
+salida de nuestra red convolucional con las características de la imagen
+obtenidas. A pesar de que dicha imagen tenga dos dimensiones, se aplana en una
+única dimensión antes de añadirle esta información, perdiendo la posición
+relativa en la imagen en el proceso.
 
-Para paliar esta pérdida de información hemos implementado codificación posicional 2-dimensional, utilizando así la información relativa de las características al completo.
+Para paliar esta pérdida de información hemos implementado codificación
+posicional 2-dimensional, utilizando así la información relativa de las
+características al completo.
 
-% TODO: aqui vendria super bien añadir la ref de donde hemos sacado la implementacion de codificación posicional:
+% TODO: aqui vendria super bien añadir la ref de donde hemos sacado la
+% implementacion de codificación posicional:
 % https://github.com/wzlxjtu/PositionalEncoding2D/blob/master/positionalembedding2d.py
 
 \subsection{Métrica BLEU}
 
-Hacia el final del desarrollo hemos implementado la [métrica BLEU](https://en.wikipedia.org/wiki/BLEU) para evaluar de forma más intuitiva los resultados obtenidos. Esta métrica nos da una estimación de cuanto se parecen dos cadenas de tokens. Suele utilizarse para comparar cuán buena es una traducción de lenguaje a otro, y la utilizaremos en el último experimento.
+Hacia el final del desarrollo hemos implementado la [métrica
+BLEU](https://en.wikipedia.org/wiki/BLEU) para evaluar de forma más intuitiva
+los resultados obtenidos. Esta métrica nos da una estimación de cuanto se
+parecen dos cadenas de tokens. Suele utilizarse para comparar cuán buena es una
+traducción de lenguaje a otro, y la utilizaremos en el último experimento.
 
 % Referencia: [tensor2tensor](https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu\_hook.py#L132).
 
