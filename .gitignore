@@ -8,3 +8,11 @@ random-notebooks/
 data/toy-dataset/*.zip
 data/toy-dataset/*.lst
 data/toy-dataset/*_images*
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.run.xml
+*.synctex.gz
+*.toc
