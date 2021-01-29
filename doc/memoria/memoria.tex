@@ -706,7 +706,6 @@ el mismo, nos permitirá aumentar el tamaño del batch estudiado para
 
 \subsection{Experimentos sobre \textsc{im2latex-170k}}
 
-<<<<<<< HEAD
 Para esta tanda de experimentos ponemos en uso el \emph{early stopping} (TODO: AÑADIR REF
 A LA SECCION) implementado anteriormente. Este se dará si no se ha mejorado la precisión
 en validación en un 1\% durante 10 evaluaciones consecutivas. Realizamos una evaluación
@@ -836,7 +835,7 @@ Utilizamos para este el modelo anterior, con eliminación de ambigüedades, aña
 % TODO: creo que el siguiente parrafo esta un poco cogido con pinzaas porque ResNet hace exactamente lo contrario y tambien lo tengo que justificar xd
 
 En este experimento se activo el \emph{early stopping} tras dos evaluacines (100 batches
-de 232 imágenes) de la segunda epoch. Observando la tabla vemos como este modelo empeora
+de 32 imágenes cada uno) de la segunda epoch. Observando la tabla vemos como este modelo empeora
 la precisión en validación en un 2\%. Sin embargo, aumenta considerablemente la velocidad
 de convergencia. Es por ello que se reduce el tiempo de ejecución total en más de 4 horas.
 
@@ -903,25 +902,145 @@ los resultados obtenidos:
 	\includegraphics{fig/im2latex-3c.pdf}
 \end{figure}
 
-Como podemos ver, el \emph{early stopping} ha vuelto a activarse ante la falta de convergencia. Aunque los resultados en precisión apenas varían, la evolución se ha estancado antes de terminar la primera epoch. Los valores de pérdida en validación si tardan más en converger y oscilan, aunque ya hemos observado oscilaciones parecidas en experimentos anteriores.
+Como podemos ver, el \emph{early stopping} ha vuelto a activarse ante la falta de
+convergencia. Aunque los resultados en precisión apenas varían, la evolución se ha
+estancado antes de terminar la primera epoch. Los valores de pérdida en validación
+si tardan más en converger y oscilan, aunque ya hemos observado oscilaciones
+parecidas en experimentos anteriores.
 
-En principio, este experimento no revela nada particularmente esclarecedor sobre la codificación posicional 2-dimensional, solamente un estancamiento prematuro. Lo utilizaremos en experimentos posteriores debido a esta inconclusión que debería ser estudiada con mayor profundidad. 
+En principio, este experimento no revela nada particularmente esclarecedor sobre la
+codificación posicional 2-dimensional, solamente un estancamiento prematuro. Lo
+utilizaremos en experimentos posteriores debido a esta inconclusión que debería
+ser estudiada con mayor profundidad. 
 
 
 \subsubsection{Learning rate modificado}
 
-%TODO: lol se me habia olvidado esto
+Este experimento es un poco distinto. No es de los experimentos que inicialmente
+enfocamos como para poner en esta memoria, sino como uno utilizado para probar
+distintas alternativas o ideas que quizas podrían mejorar el modelo pero no han
+acabado funcionando. Es por ello que no hemos realizado más experimentos en esta
+dirección. Sin embargo, creemos que por la idea merece la pena que destacarlo aquí.
+
+El eje central de este experimento es la evolución del \emph{learning rate} del
+modelo, originalmente es la siguiente:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{fig/learning-rate}
+	\caption{Evolución del learning rate original}
+\end{figure}
+
+Donde vemos el valor del \emph{learning rate} respecto al número de imágenes que
+estudia el modelo. El \emph{learning rate} se inicializa a 0.0040 y se reduce poco
+a poco conforme evoluciona el modelo. Nuestra idea fue permitir valores altos de
+learning rate en ciertos puntos del modelo más desarollado. Esto permitiría al
+modelo escapar de mínimos locales, siguiendo la terminología del \emph{Gradient
+	Descent}. Propusimos la siguiente curva alterada:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{fig/learning-rate2}
+	\caption{Evolución del learning rate propuesto}
+\end{figure}
+
+Utilizando esta nueva evolución para el \emph{learning rate} lanzamos un nuevo
+experimento. El modelo de este experimento es una combinación de los experimentos
+\ref{exp:3a} y \ref{exp:3b}. Es decir, utiliza ResNet en vez de la CNN simple
+utilizada en el modelo inicial junto con atención eficiente. Veamos los resultados
+obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión       & Precisión en validación & Pérdida         & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		CNN Elim. Amb.     & \textbf{0.8701} & \textbf{0.8295}         & \textbf{0.6272} & \textbf{0.8406}       & 8.77       \\
+		Modelo Alternativo & 0.7956          & 0.7860                  & 1.4274          & 0.9771                & 2.70      
+	\end{tabular}
+\end{table}
+
+% TODO: sustituir esta imagen por la bonita correspondiente
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/im2latex-4}
+\end{figure}
+
+Como podemos ver, el modelo activó el \emph{early stopping} y se estanco mucho antes
+que el resto de modelos estudiados hasta ahora. Es por ello que descartamos esta línea
+de estudio.
+
 
 \subsection{Experimentos finales}
 
-\subsubsection{Big boy}
+Para estos ultimos experimentos buscamos obtener el mejor modelo posible en términos
+de precisión en validación. Finalmente, evaluaremos el modelo correspondiente sobre el
+conjunto de test.
 
+\subsubsection{Combinación de los experimentos anteriores: Big boy}
 
-% TODO: justificar aqui la hipotesis de 3b de que codificacion poscional no añade convergencia prematura (o no)
+En primer lugar combinaremos todas las características implementadas en todos los
+experimentos anteriores y dejaremos que el modelo entrene todo lo posible sin alterar
+nada más. En particular, Utilizaremos eliminación de ambigüedades (\ref{exp:2}),
+atención eficiente (\ref{exp:3a}), ResNet en lugar de la red convolucional simple
+(\ref{exp:3b}) y codificación posicional 2-dimensional (\ref{exp:3c}). 
+
+Reconfiguramos el \emph{early stopping} para que sea active tras 10 evaluaciones
+sin una mejora del 0.01\% de precisión en validación y entrenamos el modelo
+durante 5 epochs. Veamos los resultados obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión & Precisión en validación & Pérdida & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		Big Boy & 0.8889    & 0.8514                  & 0.5196  & 0.8602                & 20.23     
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/bigboy.pdf}
+\end{figure}
+
+Hemos obtenido una precisión del 85.14\% en validación, la mayor hasta ahora. Vemos como la evolución de la misma se produce sobretodo durante la primera epoch, como ya ocurría en los experimentos anteriores. Sin embargo, el modelo nunca llega a estancarse ya que no ha activado el \emph{early stopping} y ejecuta las 5 epochs al completo. Esto sugiere que podría mejorarse aún más, aunque sea ínfimamente, entrenándolo aún más.
+
+Esto, claramente, no es una opción después de las 20.23 horas de entrenamiento que ha supuesto este experimento. Procedemos ahora a jugar con los parámetros del modelo para intentar mejorarlo todavía más.
 
 \subsubsection{Bigger boy}
 
-\subsubsection{Lattest boy (estudio sobre test)}
+Para este último experimento antes de la evaluación final mantendremos el modelo anterior y reajustaremos algunos de sus parámetros. En particular:
+
+% TODO: Dani si quieres dar mas informacion sobre estos parámetros y por qué, creo que peude venir bien
+
+\begin{itemize}
+	\item Aumentamos la profundidad del modelo de 20 a 32.
+	\item Aumentamos el número de capas de 1 a 4.
+	\item Aumentamos el número de cabezas de atención de 1 a 4, utilizando así atención multidimensional.
+\end{itemize}
+
+Adicionalmente, mantenemos la configuración de \emph{early stopping} pero reducimos el número de epochs a 3 para reducir el tiempo de cómputo total. Veamos los resultados obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión & Precisión en validación & Pérdida & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		Big Boy    & 0.8889    & 0.8514                  & 0.5196  & 0.8602                & 20.23 \\
+		Bigger Boy & 0.9054    & 0.8596                  & 0.4309  & 0.5976                & 18.40
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/bigboys.pdf}
+\end{figure}
+
+Obteniendo en unicamente 3 epochs una precisión del 85.96\% en validación. Además, como se puede apreciar en las gráficas, las precisión en validación sigue creciendo cuando paramos el entrenamiento por encima de la del experimento anterior, volviendo a sugerir la necesidad de un entrenamiento prolongado.
+
+Sin embargo, esta modificación en los parámetros nos ha salido cara: el tiempo de cómputo de 3 epochs ha aumentado a 18.40 horas. Esto nos indica que a pesar de que el tiempo sea cercano al de Big Boy, hemos conseguido mejor resultado con unicamente 3 epochs. Esto vuelve a reforzar la hipótesis de que con más datos el modelo sería aún mejor.
+
+Cabe destacar finalmente la mejora en pérdida en validación. Esta es la primera comparación en la que puede observarse una mejora notable en este valor.
+
+
+\subsubsection{Evaluación sobre test}
 
 \section{Conclusiones}
 
