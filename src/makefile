@@ -245,3 +245,32 @@ cli_job_test_bleu:
 		--optimizer adam \
 		--lr-schedule vaswani' \
 	--workspace .
+
+
+cli_job_im2latex_last_boy:
+	gradient experiments run singlenode \
+	--name latexrec \
+	--projectId prqyjc7d5 \
+	--container danipozo/latexrec \
+	--machineType 'P6000' \
+	--command 'python train.py \
+		--dataset im2latex \
+		--remove-ambiguities yes \
+		--num-layers 4 \
+		--depth 20 \
+		--feedforward-units 32 \
+		--num-heads 4 \
+		--dropout-rate 0.1 \
+		--performer-attention-encoder yes \
+		--positional-encoding 2d \
+		--conv-encoder resnet \
+		--conv-filters 32 \
+		--pretrain-conv-encoder no \
+		--maximum-target-length 200 \
+		--epochs 3 \
+		--conv-encoder-epochs 2 \
+		--batch-size 32 \
+		--optimizer adam \
+		--lr-schedule vaswani \
+		--log-folder-name last_boy' \
+	--workspace .

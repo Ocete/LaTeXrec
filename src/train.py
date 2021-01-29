@@ -39,7 +39,7 @@ remove_ambiguities = args.remove_ambiguities == 'yes'
 logger.info('Loading data')
 
 if args.dataset == 'im2latex':
-    train_df, _ = datasets.load_im2latex_dataset(remove_ambiguities)
+    train_df, test_df = datasets.load_im2latex_dataset(remove_ambiguities)
     image_dir = datasets.get_paths(1)[1]
 elif args.dataset == 'toy_50k':
     train_df, _ = datasets.load_toy_dataset(remove_ambiguities)
@@ -50,7 +50,11 @@ if hasattr(args, 'samples') and args.samples is not None:
     train_df = train_df[:args.samples]
 
 # - Split in train/val and get tf.data.Dataset objects
-train_df, val_df = datasets.split_in_train_and_val(train_df)
+#train_df, val_df = datasets.split_in_train_and_val(train_df)
+
+# IMPORTANT: THIS IS ONLY FOR THE TEST EXPERIMENT.
+# For validation, uncomment the previous line.
+train_df, val_df = train_df, test_df
 
 train_dataset = datasets.LaTeXrecDataset(
     train_df, image_dir)
@@ -291,7 +295,7 @@ def evaluate():
 logger.info('Initializing early stop params')
 es_params = { 
     'prev_val_acc': 0,
-    'min_val_increment': 0.001, # 0.0001,
+    'min_val_increment': 0.0001, # 0.0001,
     'evals_without_increment': 0,
     'max_evals_without_incr': 10, # 10
     'early_stopping_triggered': False
