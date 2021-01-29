@@ -571,7 +571,13 @@ traducción de lenguaje a otro, y la utilizaremos en el último experimento.
 
 \section{Experimentos}
 
-Explicamos a continuación los experimentos realizados.
+\subsection{Metodología}
+
+Realizaremos experimentos sobre las dos bases de datos de las que disponemos: Toy y Im2Latex. Para Toy, los experimentos tienen el objetivo principal de comprobar si algunas de las características implementadas tienen verdadera utilidad o no. Para comprobar su efectividad nos bastará con dividir el conjunto de datos en entrenamiento y validación con una proporción del 90\% / 10\%.
+
+Sin embargo, con la base de datos Im2Latex buscamos también poner a prueba el modelo. Para ello dividiremos el modelo en entrenamiento frente a test con proporción 90\% / 10\%. Este subconjunto de test es apartado antes de realizar ningún experimento.
+
+A continuación para cada experimento el conjunto de entrenamiento se baraja y se vuelve a dividir en entrenamiento y validación con proporción 90\% / 10\%. De esta forma, el subconjunto de validación varía aleatoriamente entre experimentos.
 
 \subsection{Experimentos sobre Toy}
 
@@ -579,8 +585,6 @@ En esta primera sección detallamos algunos de los experimentos más interesante
 realizados sobre la base de datos Toy \ref{sec:toy}. Vamos a destacar 3: Uno
 inicial sobre el modelo sin alteraciones que servirá como base de referencia
 para los demás, y otros dos que prueban algunas de las modificaciones implementadas. 
-
-% TODO: hablar de como no dividimos para test, unicamente para validación
 
 \subsubsection{Experimento inicial sobre Toy}
 \label{exp:toy1}
