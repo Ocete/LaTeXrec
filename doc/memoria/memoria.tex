@@ -521,6 +521,7 @@ la hemos implementado y probado.
 
 
 \subsection{Codificación posicional 2-dimensional}
+\label{feature:cod-pos-2d}
 
 La capa de \emph{self attention} en la que se basan los bloques \textit{transformers}
 sigue un modelo de conexión ``todos con todos'', por lo que pierde la información
@@ -847,17 +848,43 @@ Por otro lado, el tiempo de ejecución se reduce ligeramente. Es por ello que ut
 ResNet en los experimentos finales.
 
 
-\subsubsection{Codificación positional 2-dimensional}
+\subsubsection{Codificación posicional 2-dimensional}
 \label{exp:3c}
 
+A continuación ponemos a prueba la codificación posicional 2-dimensional explicada en
+esta sección \ref{feature:cod-pos-2d}. Para ello volvemos al modelo con una CNN simple
+quitando ambigüedades, y le añadimos la codificación posicional 2-dimensional. Veamos
+los resultados obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión       & Precisión en validación & Pérdida         & Pérdida en validación & Tiempo (h)    \\ \cline{2-6} 
+		CNN Elim. Amb.   & \textbf{0.8701} & \textbf{0.8295}         & \textbf{0.6272} & \textbf{0.8406}       & 8.77          \\
+		CNN Cod. Pos. 2d & 0.8151          & 0.7791                  & 1.2356          & 1.0639                & \textbf{3.60}
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/im2latex-3c.pdf}
+\end{figure}
+
+Como podemos ver, el \emph{early stopping} ha vuelto a activarse ante la falta de convergencia. Aunque los resultados en precisión apenas varían, la evolución se ha estancado antes de terminar la primera epoch. Los valores de pérdida en validación si tardan más en converger y oscilan, aunque ya hemos observado oscilaciones parecidas en experimentos anteriores.
+
+En principio, este experimento no revela nada particularmente esclarecedor sobre la codificación posicional 2-dimensional, solamente un estancamiento prematuro. Lo utilizaremos en experimentos posteriores debido a esta inconclusión que debería ser estudiada con mayor profundidad. 
+
+
 \subsubsection{Learning rate modificado}
+
+%TODO: lol se me habia olvidado esto
 
 \subsection{Experimentos finales}
 
 \subsubsection{Big boy}
 
 
-% TODO: justificar aqui la hipotesis de 3b de que codificacion poscional no añade convergencia prematura
+% TODO: justificar aqui la hipotesis de 3b de que codificacion poscional no añade convergencia prematura (o no)
 
 \subsubsection{Bigger boy}
 
@@ -869,8 +896,12 @@ ResNet en los experimentos finales.
 
 % TODO: Trabajo propuesto pal futuro: ajustar ResNet u otra red convolucional similar
 
-% TODO: recordatorio final: hablar de early stopping en algun sitio!
+% TODO: hablar de como no sabemos si la codificacion posicional 2d como tal tiene un efecto positivo o negativo en el modelo, y que hay que estudiarla mas a fondo.
 
+
+
+
+% TODO: recordatorio final: hablar de early stopping en algun sitio!
 
 
 
