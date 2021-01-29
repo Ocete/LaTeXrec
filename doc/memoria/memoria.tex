@@ -585,45 +585,37 @@ cálculos, evitando la complejidad cuadrática.
 \subsection{Codificación posicional 2-dimensional}
 \label{feature:cod-pos-2d}
 
-La capa de \emph{self attention} en la que se basan los bloques \textit{transformers}
-sigue un modelo de conexión ``todos con todos'', por lo que pierde la información
-posicional de los elementos que recibe. Es por ello que se añade codificación
-posicional, para añadir artificialmente dicha información de la posición de cada
-palabra.
+La capa de \emph{self attention}, en la que se basan los bloques
+\textit{transformer}, sigue un modelo de conexión ``todos con todos'', por lo
+que pierde la información posicional de los elementos que recibe. Es por ello
+que se añade codificación posicional, para añadir artificialmente dicha
+información de la posición de cada palabra.
 
-% TODO: No estoy nada seguro de querer poner esta foto y esta explicación creo
-% que anda un poco cogida con pinzas, una revisión técnica no le viene mal.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.15]{fig/positional}
-	\caption{Diseño de codificación posicional.}
-\end{figure}
-
-% TODO: Añadir a las refs:
-% https://www.youtube.com/watch?v=oUhGZMCTHtI\&list=PLIXJ-Sacf8u60G1TwcznBmK6rEL3gmZmV&index=2
-
-En nuestro caso particular, añadimos esa codificación posicional también a la
-salida de nuestra red convolucional con las características de la imagen
-obtenidas. A pesar de que dicha imagen tenga dos dimensiones, se aplana en una
-única dimensión antes de añadirle esta información, perdiendo la posición
-relativa en la imagen en el proceso.
+Sin embargo, la codificación posicional usual está pensada para dar información
+acerca de las posiciones relativas de distintos elementos en una secuencia
+plana, como puede ser un texto. En el caso de imágenes, esto supone una pérdida
+de información.
 
 Para paliar esta pérdida de información hemos implementado codificación
 posicional 2-dimensional, utilizando así la información relativa de las
 características al completo.
 
-% TODO: aqui vendria super bien añadir la ref de donde hemos sacado la
-% implementacion de codificación posicional:
-% https://github.com/wzlxjtu/PositionalEncoding2D/blob/master/positionalembedding2d.py
+En nuestro caso particular, añadimos esa codificación posicional a la salida de
+nuestra red convolucional con las características de la imagen obtenidas.
+
+La implementación de la codificación posicional 2-dimensional ha sido traducida
+a partir de la disponible
+\href{https://github.com/wzlxjtu/PositionalEncoding2D/blob/master/positionalembedding2d.py}{en
+  este fichero}.
 
 \subsection{Métrica BLEU}
 
-Hacia el final del desarrollo hemos implementado la [métrica
-BLEU](https://en.wikipedia.org/wiki/BLEU) para evaluar de forma más intuitiva
-los resultados obtenidos. Esta métrica nos da una estimación de cuanto se
-parecen dos cadenas de tokens. Suele utilizarse para comparar cuán buena es una
-traducción de lenguaje a otro, y la utilizaremos en el último experimento.
+Hacia el final del desarrollo hemos implementado la
+\href{https://en.wikipedia.org/wiki/BLEU}{métrica BLEU} para evaluar de forma
+más intuitiva los resultados obtenidos. Esta métrica nos da una estimación de
+cuanto se parecen dos cadenas de tokens. Suele utilizarse para comparar cuán
+buena es una traducción de lenguaje a otro, y la utilizaremos en el último
+experimento.
 
 % Referencia: [tensor2tensor](https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu\_hook.py#L132).
 
