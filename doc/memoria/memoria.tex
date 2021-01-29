@@ -272,7 +272,6 @@ Las bases de datos para el problema son:
   \textsc{imlatex-170k} \cite{im2latex_170k}: contiene 65000 ejemplos, que se
   añaden a los 100000 de im2latex-100k.
 \end{itemize}
-% TODO: revisar que (todas) las referencias están bien puestas.
 
 Una muestra de \textsc{imlatex-170k} se puede ver en la figura
 \ref{fig:muestras-1}.
@@ -465,9 +464,8 @@ estándar, para facilitar la depuración de errores y el seguimiento del progres
 del programa.
 
 
-\section{Características de desarrollo}
+\section{Características añadidas al modelo}
 
-% TODO: se requiere urgentemente un nuevo nombre para esta sección porque vaya tela
 
 En esta sección describimos las distintas características implementadas sobre el
 modelo inicial descrito con anterioridad. Los resultados de las mismas se
@@ -622,7 +620,26 @@ experimento.
 \section{Parámetros del modelo}
 \label{sec:params}
 
-% TODO: aqui explicamos los parámetros del modelo basico
+El modelo consta de los siguientes parámetros:
+\begin{itemize}
+\item
+  Profundidad: se refiere a la dimensión del \emph{embedding} que emplea el
+  modelo para trabajar con las secuencias de entrada.
+\item
+  Número de capas del codificador y el decodificador.
+\item
+  Número de unidades de la red aplicada punto a punto, un componente interno de
+  la arquitectura \emph{transformer}.
+\item
+  Número de cabezales de atención: la atención implementada es atención
+  multicabezal \emph{estrecha}, por lo que hay que especificar el número de
+  cabezales, que ha de dividir a la profundidad del modelo.
+\item
+  Tasa de \emph{dropout}: la arquitectura emplea \emph{dropout}, lo que obliga a
+  especificar la tasa con que se aplica el mismo.
+\item
+  Número de filtros de la red convolucional del codificador.
+\end{itemize}
 
 \section{Experimentos}
 
@@ -715,7 +732,7 @@ con ResNet tarda un poco más en ajustarse a los datos, como se aprecia en la
 gráfica de precisión en validación, también se sobreajusta menos a los mismos -
 o al menos tarda más en hacerlo. A pesar de que la mejora en un 3\% de precisión
 no demasiado remarcable, si que nos indica cierta mejora así que nos incita a
-probar esta misma comparación en la base de datos Im2Latex, como se realiza en
+probar esta misma comparación en la base de datos \textsc{im2latex-170k}, como se realiza en
 el experimento \ref{exp:3b}.
 
 En cuanto al tiempo, este aumenta ligeramente, lo que se traducirá en una
@@ -744,10 +761,6 @@ los resultados obtenidos:
 	\centering
 	\includegraphics{fig/toy-3.pdf}
 \end{figure}
-<<<<<<< HEAD
-e
-Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo es practicamente el mismo, nos permitirá aumentar el tamaño del batch estudiado para Im2Latex, como veremos en el experimento \ref{exp:3a}.
-=======
 
 Vemos en la tabla como el modelo empeora en precisión en validación respecto al
 experimento original. Como ya explicamos en la sección \ref{feature:fast-att}
@@ -767,8 +780,8 @@ cada 50 batches de 32 imágenes.
 
 Cabe destacar que estamos utilizando la precisión en validación. Esto es porque nuestro
 \emph{early stopping} no busca evitar el sobreajuste sino simplemente reducir el
-monumental tiempo de ejecución sobre Im2Latex. De hecho, como veremos, el sobreajuste en
-Im2Latex no es ni mucho menos tan relevante como lo es sobre Toy.
+monumental tiempo de ejecución sobre \textsc{im2latex-170k}. De hecho, como veremos, el sobreajuste en
+\textsc{im2latex-170k} no es ni mucho menos tan relevante como lo es sobre Toy.
 
 \subsubsection{Experimento inicial sobre \textsc{im2latex-170k}}
 \label{exp:1}
@@ -831,7 +844,7 @@ sobreajustarnos a los datos ya que el modelo sigue mejorando hasta el final.
 \label{exp:2}
 
 En este segundo experimento añadimos la eliminación de ambigüedades explicada en
-la sección \ref{feature:rem-amb} a los datos de Im2Latex. Este experimento no se
+la sección \ref{feature:rem-amb} a los datos de \textsc{im2latex-170k}. Este experimento no se
 realizó sobre Toy porque la gramática que definimos para generar dichos datos
 carece de ambigüedades.
 
@@ -868,9 +881,14 @@ ahora todos los experimentos se realizarán sobre los datos sin ambigüedades.
 \subsubsection{Atención eficiente}
 \label{exp:3a}
 
-Comprobamos ahora la eficacia de la mejora de atención eficiente \ref{feature:fast-att} aplicada sobre la base de datos Im2Latex. Como vimos en el experimento \ref{exp:toy1}, la atención eficiente no tiene como objetivo mejorar la precisión del modelo, sino reducir el uso de memoria y, potencialmente, reducir el tiempo de ejecución del mismo.
+Comprobamos ahora la eficacia de la mejora de atención eficiente
+\ref{feature:fast-att} aplicada sobre la base de datos
+\textsc{im2latex-170k}. Como vimos en el experimento \ref{exp:toy1}, la atención
+eficiente no tiene como objetivo mejorar la precisión del modelo, sino reducir
+el uso de memoria y, potencialmente, reducir el tiempo de ejecución del mismo.
 
-Utilizamos para este el modelo anterior, con eliminación de ambigüedades, añadiendole el uso de atención eficiente. Veamos los resultados obtenidos:
+Utilizamos para este el modelo anterior, con eliminación de ambigüedades,
+añadiendole el uso de atención eficiente. Veamos los resultados obtenidos:
 
 \begin{table}[H]
 	\centering
@@ -886,23 +904,24 @@ Utilizamos para este el modelo anterior, con eliminación de ambigüedades, aña
 	\includegraphics{fig/im2latex-3a.pdf}
 \end{figure}
 
-% TODO: creo que el siguiente parrafo esta un poco cogido con pinzaas porque ResNet hace exactamente lo contrario y tambien lo tengo que justificar xd
+En este experimento se activo el \emph{early stopping} tras dos evaluacines (100
+batches de 32 imágenes cada uno) de la segunda época. Observando la tabla vemos
+como este modelo empeora la precisión en validación en un 2\%. Sin embargo,
+aumenta considerablemente la velocidad de convergencia. Es por ello que se
+reduce el tiempo de ejecución total en más de 4 horas.
 
-En este experimento se activo el \emph{early stopping} tras dos evaluacines (100 batches
-de 32 imágenes cada uno) de la segunda epoch. Observando la tabla vemos como este modelo empeora
-la precisión en validación en un 2\%. Sin embargo, aumenta considerablemente la velocidad
-de convergencia. Es por ello que se reduce el tiempo de ejecución total en más de 4 horas.
-
-Si bien se podría estar dando convergencia prematura, evitando que el modelo siga mejorando
-a partir de la segunda epoch, veremos en futuros experimentos que este efecto no se produce.
+Si bien se podría estar dando convergencia prematura, evitando que el modelo
+siga mejorando a partir de la segunda época, veremos en futuros experimentos que
+este efecto no se produce.
 
 \subsubsection{ResNet}
 \label{exp:3b}
 
-Procedemos a estudiar el uso de ResNet en vez de la CNN simple utilizada hasta ahora,
-de igual manera que se hizo en el experimento \ref{exp:toy2}. Desactivamos para ello
-la atención eficiente del experimento anterior pero mantenemos la eliminación de
-ambigüedades. Veamos los resultados obtenidos:
+Procedemos a estudiar el uso de ResNet en vez de la CNN simple utilizada hasta
+ahora, de igual manera que se hizo en el experimento
+\ref{exp:toy2}. Desactivamos para ello la atención eficiente del experimento
+anterior pero mantenemos la eliminación de ambigüedades. Veamos los resultados
+obtenidos:
 
 \begin{table}[H]
 	\centering
@@ -918,29 +937,30 @@ ambigüedades. Veamos los resultados obtenidos:
 	\includegraphics{fig/im2latex-3b.pdf}
 \end{figure}
 
-Observamos como el resultado de este modelo utilizando ResNet es ligeramente peor en
-precisión que el modelo anterior. Sin embargo, la diferencia es realmente pequeña, y
-es mayor en entrenamiento que en validación. De hecho, observando las gráficas de
-precisión vemos como se reduce la precisión entrenamiento es considerablemente peor
-durante la primera mitad de la primera epoch, mientra que la precisión en validación
-es practicamente idéntica. Esto muestra como el modelo con ResNet se sobreajusta menos
-manteniendo la misma precisión en validación. 
+Observamos como el resultado de este modelo utilizando ResNet es ligeramente
+peor en precisión que el modelo anterior. Sin embargo, la diferencia es
+realmente pequeña, y es mayor en entrenamiento que en validación. De hecho,
+observando las gráficas de precisión vemos como se reduce la precisión
+entrenamiento es considerablemente peor durante la primera mitad de la primera
+época, mientra que la precisión en validación es practicamente idéntica. Esto
+muestra como el modelo con ResNet se sobreajusta menos manteniendo la misma
+precisión en validación.
 
-Estos resultados distan mucho de lo que esperábamos. Sustituir la CNN utilizada para
-extraer las características de la imagen por una mejor debería repercutir positivamente
-en los resultados del modelo.
+Estos resultados distan mucho de lo que esperábamos. Sustituir la CNN utilizada
+para extraer las características de la imagen por una mejor debería repercutir
+positivamente en los resultados del modelo.
 
-Por otro lado, el tiempo de ejecución se reduce ligeramente. Es por ello que utilizaremos
-ResNet en los experimentos finales.
+Por otro lado, el tiempo de ejecución se reduce ligeramente. Es por ello que
+utilizaremos ResNet en los experimentos finales.
 
 
 \subsubsection{Codificación posicional 2-dimensional}
 \label{exp:3c}
 
-A continuación ponemos a prueba la codificación posicional 2-dimensional explicada en
-esta sección \ref{feature:cod-pos-2d}. Para ello volvemos al modelo con una CNN simple
-quitando ambigüedades, y le añadimos la codificación posicional 2-dimensional. Veamos
-los resultados obtenidos:
+A continuación ponemos a prueba la codificación posicional 2-dimensional
+explicada en esta sección \ref{feature:cod-pos-2d}. Para ello volvemos al modelo
+con una CNN simple quitando ambigüedades, y le añadimos la codificación
+posicional 2-dimensional. Veamos los resultados obtenidos:
 
 \begin{table}[H]
 	\centering
@@ -958,7 +978,7 @@ los resultados obtenidos:
 
 Como podemos ver, el \emph{early stopping} ha vuelto a activarse ante la falta de
 convergencia. Aunque los resultados en precisión apenas varían, la evolución se ha
-estancado antes de terminar la primera epoch. Los valores de pérdida en validación
+estancado antes de terminar la primera época. Los valores de pérdida en validación
 si tardan más en converger y oscilan, aunque ya hemos observado oscilaciones
 parecidas en experimentos anteriores.
 
@@ -972,12 +992,13 @@ ser estudiada con mayor profundidad.
 
 Este experimento es un poco distinto. No es de los experimentos que inicialmente
 enfocamos como para poner en esta memoria, sino como uno utilizado para probar
-distintas alternativas o ideas que quizas podrían mejorar el modelo pero no han
+distintas alternativas o ideas que quizás podrían mejorar el modelo pero no han
 acabado funcionando. Es por ello que no hemos realizado más experimentos en esta
-dirección. Sin embargo, creemos que por la idea merece la pena que destacarlo aquí.
+dirección. Sin embargo, creemos que por la idea merece la pena reportarlo aquí.
 
 El eje central de este experimento es la evolución del \emph{learning rate} del
-modelo, originalmente es la siguiente:
+modelo, originalmente es la siguiente, proveniente de
+\cite{vaswani2017attention}:
 
 \begin{figure}[H]
 	\centering
@@ -987,10 +1008,14 @@ modelo, originalmente es la siguiente:
 
 Donde vemos el valor del \emph{learning rate} respecto al número de imágenes que
 estudia el modelo. El \emph{learning rate} se inicializa a 0.0040 y se reduce poco
-a poco conforme evoluciona el modelo. Nuestra idea fue permitir valores altos de
-learning rate en ciertos puntos del modelo más desarollado. Esto permitiría al
-modelo escapar de mínimos locales, siguiendo la terminología del \emph{Gradient
-	Descent}. Propusimos la siguiente curva alterada:
+a poco conforme evoluciona el modelo.
+
+Observamos que, al principio del entrenamiento, la precisión aumentaba
+rápidamente, y después mucho más lentamente. Nuestra idea fue permitir, en
+algunos momentos del entrenamiento, valores altos de learning rate en ciertos
+puntos del modelo más desarollado. Variantes de esta idea han sido probadas con
+gran éxito \cite{smith2018superconvergence}. Propusimos la siguiente curva
+alterada:
 
 \begin{figure}[H]
 	\centering
@@ -1016,12 +1041,12 @@ obtenidos:
 % TODO: sustituir esta imagen por la bonita correspondiente
 \begin{figure}[H]
 	\centering
-	\includegraphics{fig/im2latex-4}
+	\includegraphics{fig/im2latex-alternativo}
 \end{figure}
 
-Como podemos ver, el modelo activó el \emph{early stopping} y se estanco mucho antes
-que el resto de modelos estudiados hasta ahora. Es por ello que descartamos esta línea
-de estudio.
+Como podemos ver, el modelo activó el \emph{early stopping} y se estancó mucho
+antes que el resto de modelos estudiados hasta ahora. Es por ello que
+descartamos esta línea de estudio.
 
 
 \subsection{Experimentos finales}
@@ -1040,7 +1065,7 @@ atención eficiente (\ref{exp:3a}), ResNet en lugar de la red convolucional simp
 
 Reconfiguramos el \emph{early stopping} para que sea active tras 10 evaluaciones
 sin una mejora del 0.01\% de precisión en validación y entrenamos el modelo
-durante 5 epochs. Veamos los resultados obtenidos:
+durante 5 épocas. Veamos los resultados obtenidos:
 
 \begin{table}[H]
 	\centering
@@ -1055,30 +1080,36 @@ durante 5 epochs. Veamos los resultados obtenidos:
 	\includegraphics{fig/bigboy.pdf}
 \end{figure}
 
-Hemos obtenido una precisión del 85.14\% en validación, la mayor hasta ahora. Vemos como la evolución de la misma se produce sobretodo durante la primera epoch, como ya ocurría en los experimentos anteriores. Sin embargo, el modelo nunca llega a estancarse ya que no ha activado el \emph{early stopping} y ejecuta las 5 epochs al completo. Esto sugiere que podría mejorarse aún más, aunque sea ínfimamente, entrenándolo aún más.
+Hemos obtenido una precisión del 85.14\% en validación, la mayor hasta ahora. Vemos como la evolución de la misma se produce sobretodo durante la primera época, como ya ocurría en los experimentos anteriores. Sin embargo, el modelo nunca llega a estancarse ya que no ha activado el \emph{early stopping} y ejecuta las 5 épocas al completo. Esto sugiere que podría mejorarse aún más, aunque sea ínfimamente, entrenándolo aún más.
 
 Esto, claramente, no es una opción después de las 20.23 horas de entrenamiento que ha supuesto este experimento. Procedemos ahora a jugar con los parámetros del modelo para intentar mejorarlo todavía más.
 
 \subsubsection{Bigger boy}
 
-Para este último experimento antes de la evaluación final mantendremos el modelo anterior y reajustaremos algunos de sus parámetros. En particular:
-
-% TODO: Dani si quieres dar mas informacion sobre estos parámetros y por qué, creo que peude venir bien
+Para este último experimento antes de la evaluación final mantendremos el modelo
+anterior y reajustaremos algunos de sus parámetros. En particular:
 
 \begin{itemize}
-	\item Aumentamos la profundidad del modelo de 20 a 32.
-	\item Aumentamos el número de capas de 1 a 4.
-	\item Aumentamos el número de cabezas de atención de 1 a 4, utilizando así atención multidimensional.
+\item Aumentamos la profundidad del modelo de 20 a 32.
+\item Aumentamos el número de capas de 1 a 4.
+\item Aumentamos el número de cabezas de atención de 1 a 4, utilizando así
+  atención multidimensional.
 \end{itemize}
 
-Adicionalmente, mantenemos la configuración de \emph{early stopping} pero reducimos el número de epochs a 3 para reducir el tiempo de cómputo total. Veamos los resultados obtenidos:
+Este aumento de parámetros viene motivado por el hecho de que, en la
+bibliografía que emplea \emph{transformers}, el empleo de modelos más grandes
+suele redundar en mejoras.
+
+Adicionalmente, mantenemos la configuración de \emph{early stopping} pero
+reducimos el número de épocas a 3 para reducir el tiempo de cómputo
+total. Veamos los resultados obtenidos:
 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{llllll}
 		& Precisión & Precisión en validación & Pérdida & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
 		Big Boy    & 0.8889    & 0.8514                  & 0.5196  & 0.8602                & 20.23 \\
-		Bigger Boy & 0.9054    & 0.8596                  & 0.4309  & 0.5976                & 18.40
+		Bigger Boy & \textbf{0.9054}    & \textbf{0.8596}                  & \textbf{0.4309}  & \textbf{0.5976}                & 18.40
 	\end{tabular}
 \end{table}
 
@@ -1087,18 +1118,27 @@ Adicionalmente, mantenemos la configuración de \emph{early stopping} pero reduc
 	\includegraphics{fig/bigboys.pdf}
 \end{figure}
 
-Obteniendo en unicamente 3 epochs una precisión del 85.96\% en validación. Además, como se puede apreciar en las gráficas, las precisión en validación sigue creciendo cuando paramos el entrenamiento por encima de la del experimento anterior, volviendo a sugerir la necesidad de un entrenamiento prolongado.
+Obteniendo en unicamente 3 épocas una precisión del 85.96\% en
+validación. Además, como se puede apreciar en las gráficas, las precisión en
+validación sigue creciendo cuando paramos el entrenamiento por encima de la del
+experimento anterior, volviendo a sugerir la necesidad de un entrenamiento
+prolongado.
 
-Sin embargo, esta modificación en los parámetros nos ha salido cara: el tiempo de cómputo de 3 epochs ha aumentado a 18.40 horas. Esto nos indica que a pesar de que el tiempo sea cercano al de Big Boy, hemos conseguido mejor resultado con unicamente 3 epochs. Esto vuelve a reforzar la hipótesis de que con más datos el modelo sería aún mejor.
+Sin embargo, esta modificación en los parámetros nos ha salido cara: el tiempo
+de cómputo de 3 épocas ha aumentado a 18.40 horas. Esto nos indica que a pesar
+de que el tiempo sea cercano al de Big Boy, hemos conseguido mejor resultado con
+unicamente 3 épocas. Esto vuelve a reforzar la hipótesis de que con más datos el
+modelo sería aún mejor.
 
-Cabe destacar finalmente la mejora en pérdida en validación. Esta es la primera comparación en la que puede observarse una mejora notable en este valor.
+Cabe destacar finalmente la mejora en pérdida en validación. Esta es la primera
+comparación en la que puede observarse una mejora notable en este valor.
 
 
 \subsubsection{Evaluación sobre test}
 
 \section{Conclusiones}
 
-% TODO: comentar la hipotesis del aumento de datos + sobreajuste antes repetidas epochs -> comentar posibles experimentos en esta dirección
+% TODO: comentar la hipotesis del aumento de datos + sobreajuste antes repetidas épocas -> comentar posibles experimentos en esta dirección
 
 % TODO: Trabajo propuesto pal futuro: ajustar ResNet u otra red convolucional similar
 
