@@ -287,7 +287,7 @@ a la anterior.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics{../fig/ejemplo-im2latex.pdf}
+	\includegraphics{./fig/ejemplo-im2latex.pdf}
 	\caption{Tres muestras de im2latex-170k.}
 	\label{fig:muestras-1}
 \end{figure}
@@ -310,7 +310,7 @@ o hiperparámetros de forma menos costosa.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics{../fig/ejemplo-sintetica.pdf}
+	\includegraphics{fig/ejemplo-sintetica.pdf}
 	\caption{Muestras de la base de datos sintética.}
 	\label{fig:muestras-sintetica}
 \end{figure}
@@ -596,7 +596,10 @@ los parámetros especificados \ref{sec:sec:params} sin ninguna modificación. Lo
 	\end{tabular}
 \end{table}
 
-% TODO: insert fig here
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/toy-1.pdf}
+\end{figure}
 
 Obtenemos una precisión en entrenamiento del 92.01\% frente a 50.98\% en validación,
 produciéndose un tremendo sobreajuste sobre los datos de entrenamiento. En las gráficas
@@ -632,7 +635,10 @@ invariantes para comparar unicamente el resultado de ResNet. Veamos los resultad
 	\end{tabular}
 \end{table}
 
-% TODO: insert fig
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/toy-2.pdf}
+\end{figure}
 
 Vemos como el modelo mejora en todas las métricas estudiadas. Si bien el modelo
 con ResNet tarda un poco más en ajustarse a los datos, como se aprecia en la gráfica
@@ -660,7 +666,10 @@ En este tercer y último experimento sobre Toy probamos la atención eficiente e
 	\end{tabular}
 \end{table}
 
-% TODO: insert fig
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/toy-3.pdf}
+\end{figure}
 
 Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo es practicamente el mismo, nos permitirá aumentar el tamaño del batch estudiado para Im2Latex, como veremos en el experimento \ref{exp:3a}.
 
