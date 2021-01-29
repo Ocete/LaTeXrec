@@ -573,24 +573,36 @@ traducción de lenguaje a otro, y la utilizaremos en el último experimento.
 
 \subsection{Metodología}
 
-Realizaremos experimentos sobre las dos bases de datos de las que disponemos: Toy y Im2Latex. Para Toy, los experimentos tienen el objetivo principal de comprobar si algunas de las características implementadas tienen verdadera utilidad o no. Para comprobar su efectividad nos bastará con dividir el conjunto de datos en entrenamiento y validación con una proporción del 90\% / 10\%.
+Realizaremos experimentos sobre las dos bases de datos de las que disponemos: la
+sintética e \textsc{im2latex-170k}. Para la sintética, los experimentos tienen
+el objetivo principal de comprobar si algunas de las características
+implementadas tienen verdadera utilidad o no. Para comprobar su efectividad nos
+bastará con dividir el conjunto de datos en entrenamiento y validación con una
+proporción del 90\% / 10\%.
 
-Sin embargo, con la base de datos Im2Latex buscamos también poner a prueba el modelo. Para ello dividiremos el modelo en entrenamiento frente a test con proporción 90\% / 10\%. Este subconjunto de test es apartado antes de realizar ningún experimento.
+Sin embargo, con la base de datos \textsc{im2latex-170k} buscamos también poner
+a prueba el modelo. Para ello dividiremos el modelo en entrenamiento frente a
+test con proporción 90\% / 10\%. Este subconjunto de test es apartado antes de
+realizar ningún experimento.
 
-A continuación para cada experimento el conjunto de entrenamiento se baraja y se vuelve a dividir en entrenamiento y validación con proporción 90\% / 10\%. De esta forma, el subconjunto de validación varía aleatoriamente entre experimentos.
+A continuación para cada experimento el conjunto de entrenamiento se baraja y se
+vuelve a dividir en entrenamiento y validación con proporción 90\% / 10\%. De
+esta forma, el subconjunto de validación varía aleatoriamente entre
+experimentos.
 
-\subsection{Experimentos sobre Toy}
+\subsection{Experimentos sobre los datos sintéticos}
 
 En esta primera sección detallamos algunos de los experimentos más interesantes
-realizados sobre la base de datos Toy \ref{sec:toy}. Vamos a destacar 3: Uno
-inicial sobre el modelo sin alteraciones que servirá como base de referencia
-para los demás, y otros dos que prueban algunas de las modificaciones implementadas. 
+realizados sobre la base de datos sintética \ref{sec:toy}. Vamos a destacar 3:
+uno inicial sobre el modelo sin alteraciones que servirá como referencia para
+los demás, y otros dos que prueban algunas de las modificaciones implementadas.
 
-\subsubsection{Experimento inicial sobre Toy}
+\subsubsection{Experimento inicial sobre los datos sintéticos}
 \label{exp:toy1}
 
-Para el primer experimento nos ceñimos al modelo propuesto \ref{sec:model} junto con
-los parámetros especificados \ref{sec:sec:params} sin ninguna modificación. Los resultados obtenidos han sido los siguientes: 
+Para el primer experimento nos ceñimos al modelo propuesto \ref{sec:model} junto
+con los parámetros especificados \ref{sec:sec:params} sin ninguna
+modificación. Los resultados obtenidos han sido los siguientes:
 
 \begin{table}[H]
 	\centering
@@ -605,30 +617,29 @@ los parámetros especificados \ref{sec:sec:params} sin ninguna modificación. Lo
 	\includegraphics{fig/toy-1.pdf}
 \end{figure}
 
-Obtenemos una precisión en entrenamiento del 92.01\% frente a 50.98\% en validación,
-produciéndose un tremendo sobreajuste sobre los datos de entrenamiento. En las gráficas
-vemos como 4 o 5 epochs eran suficientes para ajustar el modelo a los datos. A partir de
-ese punto, la precisión en validación baja ligeramente mientras que en entrenamiento
-continúa subiendo. De la misma forma, la pérdida acaba subiendo hacia conforme aumenta
-el número de epochs.
+Obtenemos una precisión en entrenamiento del 92.01\% frente a 50.98\% en
+validación, produciéndose un tremendo sobreajuste sobre los datos de
+entrenamiento. En las gráficas vemos como 4 o 5 épocas eran suficientes para
+ajustar el modelo a los datos. A partir de ese punto, la precisión en validación
+baja ligeramente mientras que en entrenamiento continúa subiendo. De la misma
+forma, la pérdida acaba subiendo conforme aumenta el número de épocas.
 
-El tiempo de ejecución completo ha sido de 1.27 horas. No es particularmente alto,
-pero si consideramos que aún no hemos añadido ningún extra al modelo, y que la bases
-de datos utilizada es la sintética, esto nos hace pensar que el tiempo de ejecuciones
-de los posteriores experimentos será notablemente alto.
+El tiempo de ejecución completo ha sido de 1.27 horas. No es particularmente
+alto, pero si consideramos que aún no hemos añadido ningún extra al modelo, y
+que la bases de datos utilizada es la sintética, esto nos hace pensar que el
+tiempo de ejecuciones de los posteriores experimentos será notablemente alto.
 
-Cabe destacar que ese 50.98\% de precisión en validación nos indica que el modelo
-acierta exactamente el código \LaTeX{} esperado elemento a elemento, obviamente
-incluyendo orden, en la mitad de los casos. En la otra mitad, falla al menos en
-un elemento o el ordenamiento de los mismos.
+Ese 50.98 \% de precisión en validación nos indica que el modelo acierta el
+siguiente símbolo \LaTeX{} esperado en el 50.98 \%, en media, de los casos.
 
 
 \subsubsection{ResNet}
 \label{exp:toy2}
 
-En este segundo experimento cambiamos la red convolucional utilizada para extraer
-las características de las imágenes por una ResNet. Mantenemos el resto de parámetros
-invariantes para comparar unicamente el resultado de ResNet. Veamos los resultados obtenidos:
+En este segundo experimento cambiamos la red convolucional utilizada para
+extraer las características de las imágenes por una ResNet. Mantenemos el resto
+de parámetros invariantes para comparar unicamente el resultado de
+ResNet. Veamos los resultados obtenidos:
 
 \begin{table}[H]
 	\centering
@@ -645,20 +656,24 @@ invariantes para comparar unicamente el resultado de ResNet. Veamos los resultad
 \end{figure}
 
 Vemos como el modelo mejora en todas las métricas estudiadas. Si bien el modelo
-con ResNet tarda un poco más en ajustarse a los datos, como se aprecia en la gráfica
-de precisión en validación, también se sobreajusta menos a los mismos - o al menos
-tarda más en hacerlo. A pesar de que la mejora en un 3\% de precisión no demasiado
-remarcable, si que nos indica cierta mejora así que nos incita a probar esta misma
-comparación en la base de datos Im2Latex, como se realiza en el experimento \ref{exp:3b}.
+con ResNet tarda un poco más en ajustarse a los datos, como se aprecia en la
+gráfica de precisión en validación, también se sobreajusta menos a los mismos -
+o al menos tarda más en hacerlo. A pesar de que la mejora en un 3\% de precisión
+no demasiado remarcable, si que nos indica cierta mejora así que nos incita a
+probar esta misma comparación en la base de datos Im2Latex, como se realiza en
+el experimento \ref{exp:3b}.
 
-En cuanto al tiempo, este aumenta ligeramente, lo que se traducirá en una posterior
-sobrecarga temporal en su aplicación sobre Im2Latex.
+En cuanto al tiempo, este aumenta ligeramente, lo que se traducirá en una
+posterior sobrecarga temporal en su aplicación sobre \textsc{im2latex-170k}.
 
 
-\subsubsection{Atención Rápida}
+\subsubsection{Atención rápida}
 \label{exp:toy3}
 
-En este tercer y último experimento sobre Toy probamos la atención eficiente explicada en la sección \ref{feature:fast-att}. Volvemos a utilizar la red convolucional simple y mantenemos el mismo de parámetros. Veamos los resultados obtenidos:
+En este tercer y último experimento sobre los datos sintéticos probamos la
+atención eficiente explicada en la sección \ref{feature:fast-att}. Volvemos a
+utilizar la red convolucional simple y mantenemos los mismos parámetros. Veamos
+los resultados obtenidos:
 
 \begin{table}[h]
 	\centering
@@ -675,7 +690,13 @@ En este tercer y último experimento sobre Toy probamos la atención eficiente e
 	\includegraphics{fig/toy-3.pdf}
 \end{figure}
 
-Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo es practicamente el mismo, nos permitirá aumentar el tamaño del batch estudiado para Im2Latex, como veremos en el experimento \ref{exp:3a}.
+Vemos en la tabla como el modelo empeora en precisión en validación respecto al
+experimento original. Como ya explicamos en la sección \ref{feature:fast-att}
+donde se explica la atención eficiente, el objetivo de esta es reducir el
+consumo de memoria, uno de los principales cuellos de botella del modelo. Si
+bien esto no se percibe particularmente ahora ya que el tiempo es practicamente
+el mismo, nos permitirá aumentar el tamaño del batch estudiado para
+\textsc{im2latex-170k}, como veremos en el experimento \ref{exp:3a}.
 
 \subsection{Experimentos sobre Im2Latex}
 
