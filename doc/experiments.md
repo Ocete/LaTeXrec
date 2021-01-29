@@ -1,4 +1,4 @@
-# List of experiments run
+# List of experiments done
 
 ### Toy dataset
 
