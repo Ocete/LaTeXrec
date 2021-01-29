@@ -449,14 +449,24 @@ aplicación del modelo.
 
 Una vez comenzamos a trabajar con la base de datos \textsc{im2latex-170K}
 descubrimos que esta no cabía por completo en memoria. De hecho, no cabía ni una
-parte. De cara a implementar una solución escalable y eficiente a este problema
-creamos una clase, \texttt{LaTeXrecDataset}, que hereda de
+cuarta parte. De cara a implementar una solución escalable y eficiente a este
+problema creamos una clase, \texttt{LaTeXrecDataset}, que hereda de
 \texttt{tf.data.Dataset} \cite{tf_dataset}, de TensorFlow. Esta clase nos
 permite leer las imágenes conforme el modelo las necesita y, al mismo tiempo,
 eliminarlas de memoria cuando dejan de hacerlo. Todo esto se procesa de forma
 automática y muy cómodamente, además de permitirnos implementar
 \emph{prefetching}. Esto es, lectura anticipada de los datos antes de que hagan
 falta para acelerar el proceso.
+
+\subsection{\emph{Early Stopping}}
+\label{early-stopping}
+
+Hemos implementado \emph{early stopping} con el objetivo de reducir el tiempo
+de cómputo de algunos experimentos cuando se estanca su evolución. Esta
+implementación ha sido manual ya que el entrenamiento de los modelos se
+realiza paso a paso manualmente y no podemos utilizar el \emph{callbacks}
+de Tensorflow. Dicho \emph{early stopping} esta basado la precisión en
+validación, no en la pérdida.
 
 \subsection{Registros (\emph{logs})}
 
@@ -760,10 +770,10 @@ el mismo, nos permitirá aumentar el tamaño del batch estudiado para
 
 \subsection{Experimentos sobre \textsc{im2latex-170k}}
 
-Para esta tanda de experimentos ponemos en uso el \emph{early stopping} (TODO: AÑADIR REF
-A LA SECCION) implementado anteriormente. Este se dará si no se ha mejorado la precisión
-en validación en un 1\% durante 10 evaluaciones consecutivas. Realizamos una evaluación
-cada 50 batches de 32 imágenes.
+Para esta tanda de experimentos ponemos en uso el \emph{early stopping} \ref{early-stopping} implementado anteriormente. Este se dará si no se 
+ha mejorado la precisión en validación en un 1\% durante 10 evaluaciones
+consecutivas. Realizamos una evaluación cada 50 batches de 32 imágenes
+cada uno.
 
 Cabe destacar que estamos utilizando la precisión en validación. Esto es porque nuestro
 \emph{early stopping} no busca evitar el sobreajuste sino simplemente reducir el
@@ -1101,12 +1111,35 @@ Cabe destacar finalmente la mejora en pérdida en validación. Esta es la primer
 
 \subsection{Trabajo futuro}
 
-En esta sección exponemos las líneas de trabajo que no hemos podido explorar por falta de tiempo:
+En esta sección exponemos las líneas de trabajo que no hemos podido explorar
+por falta de tiempo:
 
 \begin{itemize}
-	\item Aumento de datos: Hemos visto en distintos experimentos como no son necesarias muchas epochs sobre los mismos datos, sino más datos distintos entre sí. De cara a generar nuevos datos se puede generar una gramática más compleja que la creada para la base de datos sintética, o bien aplicar técnicas de visión por computador a las imágenes, aunque con muchas restricciones para no invalidar los resultados asociados.
-	\item % TODO: Trabajo propuesto pal futuro: ajustar ResNet u otra red convolucional similar
-	\item  % TODO: hablar de como no sabemos si la codificacion posicional 2d como tal tiene un efecto positivo o negativo en el modelo, y que hay que estudiarla mas a fondo.
+\item
+	Aumento de datos: Hemos visto en distintos experimentos como no son
+	necesarias muchas epochs sobre los mismos datos, sino más datos distintos
+	entre sí. De cara a generar nuevos datos se puede generar una gramática más
+	compleja que la creada para la base de datos sintética, o bien aplicar
+	técnicas de visión por computador a las imágenes, aunque con muchas
+	restricciones para no invalidar los resultados asociados.
+	
+\item
+	En el experimento \ref{exp:3b} vimos como sustituir la CNN simple utilizada
+	por una ResNet no mejoraba particularmente los resultados. La extracción
+	de características es un proceso fundamental de nuestro modelo y deberíamos
+	estudiar cómo mejorar el modelo en ese sentido. Quizás una red CNN simple
+	sea suficiente para obtener toda la información de imágenes relativamente
+	sencillas como las que utilizamos. Sería necesario estudiar un equilibrio
+	entre buena extracción de características y minimizar el tiempo de ejecución
+	en esta sección del modelo.
+	
+\item
+	En el experimento \ref{exp:3c} estudiamos la codificación posicional
+	2-dimensional sin llegar a ninguna conclusión específica. Actualmente
+	no estamos seguros de si mejora o empeora el modelo, sólo de que las
+	variaciones en los resultados obtenidas al introducir esta característica
+	en el modelo no son especialmente agresivas. Sería necesario estudiar en
+	profundidad esta modificación.
 \end{itemize}
 
 
