@@ -350,8 +350,6 @@ sufrirá ciertas variaciones, el esquema general no variará. Este modelo posee 
 codificador convolucional con tres capas Conv-BN-ELU-MaxPooling y una sola capa
 de atención en el codificador y en el decodificador.
 
-% TODO: quitar esta proxima linea, que hace que no salga el modelo.
-% \iffalse
 \begin{figure}[h]
 	\centering
 	
@@ -385,7 +383,6 @@ de atención en el codificador y en el decodificador.
 	\caption{Bloques del modelo de referencia.}
 	\label{fig:bloques-referencia}
 \end{figure}
-% \fi
 
 
 \section{Detalles técnicos y de implementación}
@@ -1093,7 +1090,7 @@ Hemos obtenido una precisión del 85.14\% en validación, la mayor hasta ahora. 
 
 Esto, claramente, no es una opción después de las 20.23 horas de entrenamiento que ha supuesto este experimento. Procedemos ahora a jugar con los parámetros del modelo para intentar mejorarlo todavía más.
 
-\subsubsection{Bigger boy}
+\subsubsection{Ajuste de parámetros: Bigger boy}
 
 Para este último experimento antes de la evaluación final mantendremos el modelo
 anterior y reajustaremos algunos de sus parámetros. En particular:
@@ -1145,7 +1142,52 @@ comparación en la que puede observarse una mejora notable en este valor.
 
 \subsubsection{Evaluación sobre test}
 
+En este último experimento evaluamos el modelo anterior en el conjunto de test.
+Para ello entrenaremos con todo el conjunto de entrenamiento, que hasta ahora
+se había utilizado dividido entre entrenamiento y validación. El único cambio ha sido reducir la profundidad del modelo de 32 a 20 para reducir el tiempo de ejecución.
+
+Adicionalmente, no hemos podido ejecutar este modelo sobre 3 epochs como hicimos
+con el anterior, sino unicamente sobre 2. Esto se debe a que el conjunto de
+entrenamiento es aún más grande (al incluir también a validación). Veamos los
+resultados obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllllll}
+		& Prec.           & Prec. en val/test & Pérd.           & Pérd. en val/test & BLEU                  & BLEU en test          & Tiempo (h)     \\ \cline{2-8} 
+		Bigger Boy & \textbf{0.9054} & \textbf{0.8596}   & \textbf{0.4309} & \textbf{0.5976}   & \multicolumn{1}{c}{-} & \multicolumn{1}{c}{-} & \textbf{18.40} \\
+		Test       & 0.8788          & 0.8389            & 0.5942          & 0.8817            & 0.8675                & 0.8098                & 19.43         
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{fig/lastboy.pdf}
+\end{figure}
+
+Vemos como los resultados obtenidos no difieren particularmente de los
+estudios realizados en validación. Hemos alcanzado una precisión final en
+test del 83.89\% con tan solo dos epochs, lo que naturalmente es mejorable
+con más entrenamiento. Sin embargo, dicho tiempo ha ascendido a 19.43 horas
+al aumentar el tamaño de conjunto de entrenamiento.
+
+Cabe destacar que este el primer experimento en el que hemos puesto en
+práctica la métrica BLEU, que fue implementada hacía el final del desarrollo.
+Esta nos da una aproximación de lo buena que es la traducción realizada.
+Los valores son consistentes respecto a los de precisión.
+
 \section{Conclusiones}
+
+En este trabajo hemos afrontado el problema de la obtención de código
+\LaTeX{} de una serie de fórmulas a partir de las imágenes que generan.
+Para ello hemos utilizado un modelo codificador-decodificador con
+\emph{transformers} junto con una red ResNet para extraer las características
+de las imágenes.
+
+El modelo final entrena en 20 horas obteniendo una precisión del83.89\%
+y un valor de métrica BLEU del 80.98\% en test. A pesar de que este modelo
+es mejorable en muchos aspectos, consideramos los resultados obtenidos un
+completo éxito.
 
 \subsection{Trabajo futuro}
 
