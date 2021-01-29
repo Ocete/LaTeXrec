@@ -57,3 +57,7 @@ All of these experiments run 2 epochs and early stopping with 0.001 min val_acc 
 3b. https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/est5b43tpjdn4t/jobs/jkfycl2xm3jty/logs
 
 3c. https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/e8j2lchkw4ow4/jobs/jsizzvhvqsqvrg/logs
+
+### Final experiment
+
+Lattest boy: https://console.paperspace.com/latexrec/projects/prqyjc7d5/experiments/e708rd0mgyjlk/jobs/jes31vf91pqos/logs
