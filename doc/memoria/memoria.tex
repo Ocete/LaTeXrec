@@ -217,10 +217,10 @@ Subtítulo} % Subtitle
 	\parbox[b]{0.8\textwidth}{ % Paragraph box for holding the title page text, adjust the width to move the title page left or right on the page
 		
 		{\Huge\bfseries Proyecto final:\\[0.5\baselineskip] Generación
-                  de \LaTeX a partir de imágenes
+                  de \LaTeX{} a partir de imágenes de fórmulas
                   \\[0.5\baselineskip]\\[2\baselineskip]} % Title
 		{\large\textit{Curso 2020/21}\\[0.5\baselineskip]Visión por computador\\[1.5\baselineskip] }% Subtitle or further description
-		{\Large\textsc{José Antonio Álvarez Ocete, \\Daniel Pozo Escalona}\\[1.5\baselineskip]joseantonioao32@correo.ugr.es\\danipozo@correo.ugr.es,} % Author name, lower case for consistent small caps
+		{\Large\textsc{José Antonio Álvarez Ocete, \\Daniel Pozo Escalona}\\[1.5\baselineskip]joseantonioao32@correo.ugr.es,\\danipozo@correo.ugr.es} % Author name, lower case for consistent small caps
 		
 		\vspace{0.4\textheight} % Whitespace between the title block and the publisher
 		
@@ -251,11 +251,16 @@ Subtítulo} % Subtitle
 
 Nuestro objetivo en este trabajo será desarrollar un modelo que, dada una imagen
 producida al compilar código \LaTeX{} asociado a una fórmula, prediga el código
-\LaTeX{} que fue utilizado para compilarla. Para ello utilizaremos un esquema
-codificador-decodificador utilizando \emph{transformers}.
+\LaTeX{} que fue utilizado para compilarla. La aplicación práctica de un modelo
+de estas características permitiría agilizar procesos de digitalización de
+documentos matemáticos, o la redacción de los mismos a partir de fuentes de cuyo
+código original no se dispone.
+
+Para ello utilizaremos un esquema codificador-decodificador basado en
+\emph{transformers} \cite{vaswani2017attention}.
 
 
-\section{Bases de datos utilizadas}
+\section{Bases de datos}
 \label{sec:datasets}
 
 Las bases de datos para el problema son:
@@ -269,18 +274,21 @@ Las bases de datos para el problema son:
 \end{itemize}
 % TODO: revisar que (todas) las referencias están bien puestas.
 
+Una muestra de \textsc{imlatex-170k} se puede ver en la figura
+\ref{fig:muestras-1}.
+
 Ambas bases de datos contienen ambigüedad en los ejemplos, en forma de fórmulas
 o segmentos de fórmulas que, escritos de distinta forma, producen la misma
 imagen. Dedicaremos parte del tiempo del proyecto a diseñar formas de normalizar
 estos datos, para mejorar los resultados. Entraremos en detalle más adelante.
 
-Por ello, las evaluaciones iniciales con modelos de referencia y las finales
-pueden no ser directamente comparables. Esto lo paliaremos de dos formas: con la
-base de datos sintética que introducimos a continuación, y evaluando los modelos
-de referencia en la base de datos normalizada. Además, hay que tener en cuenta
-que lo relevante en este problema es dar expresiones \LaTeX{} que produzcan las
-imágenes que se proporcionen al modelo, más que estas coincidan con unas
-prefijadas.
+Debido a esta ambigüedad, las evaluaciones iniciales con modelos de referencia y
+las finales pueden no ser directamente comparables. Esto lo paliaremos de dos
+formas: con la base de datos sintética que introducimos a continuación, y
+evaluando los modelos de referencia en la base de datos normalizada. Además, hay
+que tener en cuenta que lo relevante en este problema es dar expresiones
+\LaTeX{} que produzcan las imágenes que se proporcionen al modelo, más que estas
+coincidan con unas prefijadas.
 
 En la práctica, utilizaremos únicamente \textsc{im2latex-170k}, ya que contiene
 a la anterior.
@@ -381,7 +389,36 @@ de atención en el codificador y en el decodificador.
 % \fi
 
 
-\section{Procesamiento de los datos}
+\section{Detalles técnicos y de implementación}
+
+En esta sección detallamos algunas cuestiones que pueden tener relevancia de
+cara a reproducir el trabajo realizado y entender las dificultades técnicas que
+hemos afrontado.
+
+\subsection{\emph{Hardware} empleado}
+
+Para los experimentos, hemos empleado máquinas con las siguientes
+características:
+\begin{itemize}
+\item
+  30 GB RAM,
+\item
+  procesadores de 8 núcleos, modelo no especificado,
+\item
+  GPU Nvidia Quadro P5000 o P6000.
+\end{itemize}
+
+\subsection{Arquitectura y configuración de experimentos}
+
+El código de los experimentos ha sido concebido de la siguiente forma: como un
+guion Python principal, que se encarga de leer los datos, configurar el modelo,
+entrenarlo y guardar los resultados. La configuración del modelo depende de una
+serie de banderas de línea de órdenes que el programa interpreta. Esto nos ha
+permitido lanzar múltiples experimentos en paralelo, sin necesidad de modificar
+el código. El código se encuentra disponible en
+\url{https://github.com/Ocete/LaTeXrec}.
+
+\subsection{Preprocesamiento de datos}
 
 Para las imágenes, el procesamiento que realizamos es redimensionarlas a una
 altura común, manteniendo la relación de aspecto. Tras esto, eliminamos los
@@ -393,6 +430,20 @@ para obtener el alfabeto de entrada. Por lo tanto, este no es fijo sino que
 depende del conjunto de datos. Esto nos permite codificar las fórmulas
 numéricamente.
 
+\subsection{Guardado de modelos}
+
+TensorFlow proporciona algunas utilidades para guardar modelos y cargarlos
+posteriormente, lo que permite entrenarlos en varias fases, guardar los modelos
+en varios puntos del entrenamiento o usarlos para obtener predicciones después
+de entrenados.
+
+Sin embargo, no hemos conseguido que funcionen con nuestro modelo, que es
+relativamente complejo, en el sentido de que ha sido creado mediante \emph{model
+  subclassing} y toma varios argumentos que no son entradas (las máscaras) al
+ser llamado.
+
+Esto es un obstáculo que habría de ser solventado de cara a una posible
+aplicación del modelo.
 
 \subsection{Lectura eficiente}
 
@@ -401,19 +452,17 @@ descubrimos que esta no cabía por completo en memoria. De hecho, no cabía ni u
 parte. De cara a implementar una solución escalable y eficiente a este problema
 creamos una clase, \texttt{LaTeXrecDataset}, que hereda de
 \texttt{tf.data.Dataset} \cite{tf_dataset}, de TensorFlow. Esta clase nos
-permite leer las imágenes conformen el modelo las necesita y, al mismo tiempo,
+permite leer las imágenes conforme el modelo las necesita y, al mismo tiempo,
 eliminarlas de memoria cuando dejan de hacerlo. Todo esto se procesa de forma
 automática y muy cómodamente, además de permitirnos implementar
 \emph{prefetching}. Esto es, lectura anticipada de los datos antes de que hagan
 falta para acelerar el proceso.
 
-% TODO: no sé si el logging merece la pena comentarlo. Nos llevó su tiempo
-% (tampoco tanto, pero algo) y le añade calidad al código, pero no sé si Nicolás
-% lo verá relevante sinceramente.
+\subsection{Registros (\emph{logs})}
 
-Añadimos un sencillo y cómodo sistema de \emph{logging} a distintos archivos,
-dependiendo de la información de los
-mensajes. % TODO completar si decidimos dejarlo.
+Añadimos un sistema de \emph{logging} a distintos archivos y a la salida
+estándar, para facilitar la depuración de errores y el seguimiento del progreso
+del programa.
 
 
 \section{Características de desarrollo}
@@ -429,8 +478,8 @@ describen en la sección de experimentos.
 \label{feature:rem-amb}
 
 Como ya discutimos en la sección \ref{sec:datasets}, en este problema
-encontramos ambigüedad en la salida de los datos. Distintas expresiones $LaTeX$
-generar la misma salida o una casi indistinguible en la imagen. Por ejemplo,
+encontramos ambigüedad en la salida de los datos. Distintas expresiones \LaTeX{}
+generan la misma salida o una casi indistinguible en la imagen. Por ejemplo,
 \emph{\textbackslash sin} y \emph{\textbackslash operatorname\{sin\}}: $\sin(x)$
 frente a $\operatorname{sin}(x)$.
 
@@ -439,11 +488,11 @@ tener un modelo funcional fue eliminar este tipo de ambigüedades en los
 datos. Cabe aclarar que aunque estemos alterando los datos, la imagen \LaTeX{}
 obtenida es exactamente la misma en todos estos casos.
 
-Para ello, utilizamos el \emph{tokenizer} de TensorFlow \cite{tokenizer} para
-generar una lista de tokens de las primeras 60.000 imágenes en la que
-basarnos. Estudiando esta lista hemos decidido modificar las siguientes
-ambigüedades, buscando un balance entre implementación sencilla y que merezca la
-pena porque sean lo suficientemente relevantes:
+Utilizamos el \emph{tokenizer} de TensorFlow \cite{tokenizer} para generar una
+lista de tokens de las primeras 60.000 imágenes en la que basarnos. Estudiando
+esta lista hemos decidido modificar las siguientes ambigüedades, buscando un
+balance entre implementación sencilla y que merezca la pena porque sean lo
+suficientemente relevantes:
 
 \begin{itemize}
 \item
@@ -489,14 +538,14 @@ pena porque sean lo suficientemente relevantes:
   corta.
 
 \item
-  Finalmente, la tipografía aplicada al utilizar `\emph{\textbackslash cal}` y
-  `\emph{\textbackslash mathcal}` es exactamente la misma aunque su sintaxis es
-  distinta. `\emph{\textbackslash cal}` se utiliza para palabras o letras
+  Finalmente, la tipografía aplicada al utilizar `\emph{\textbackslash cal}`
+  y `\emph{\textbackslash mathcal}` es exactamente la misma aunque su sintaxis
+  es distinta. `\emph{\textbackslash cal}` se utiliza para palabras o letras
   sueltas: `\emph{\textbackslash prime} A`; mientras que `\emph{\textbackslash
     mathcal}` se utiliza para expresiones más complejas: `\emph{\textbackslash
     mathcal} \{ sin \textasciicircum \{ 2 \} ( x ) \}`. Puesto que el uso de
-  `\emph{\textbackslash cal}` está deprecado y `\emph{\textbackslash mathcal}`
-  es más general, utilizaremos este último, reajustando la sintaxis conforme sea
+  `\emph{\textbackslash cal}` está obsoleto y `\emph{\textbackslash mathcal}` es
+  más general, utilizaremos este último, reajustando la sintaxis conforme sea
   necesario.
 \end{itemize}
 
@@ -516,8 +565,21 @@ tabla 1 de este artículo de revisión se encuentran listadas todas las
 alternativas, junto con algunas características de las mismas.
 
 Hemos seleccionado, de entre las que permiten emplear un decodificador, la
-atención rápida mediante el mecanismo FAVOR+ \cite{choromanski_rethinking_2020},
-la hemos implementado y probado.
+atención rápida mediante el mecanismo FAVOR+
+\cite{choromanski_rethinking_2020}. Hemos adaptado la implementación de los
+autores
+(\url{https://github.com/google-research/google-research/tree/master/performer/fast_attention/tensorflow})
+y la hemos probado en algunos experimentos.
+
+Esta técnica se basa en emplear características aleatorias de Fourier \cite{rff}
+para aproximar la función Softmax, de forma que en la ecuación de la atención
+\[
+  \text{Attn}(Q, K, V) = \text{Softmax}(QK^{T})V
+\]
+se pueden reemplazar las matrices $Q$ y $K$ por matrices $Q'$ y $K'$ con una
+dimensión independiente del tamaño de la secuencia a procesar, y tales que
+$Q'K'^{T}$ aproxima a $\text{Softmax}(QK^{T})$. Así se pueden reordenar los
+cálculos, evitando la complejidad cuadrática.
 
 
 \subsection{Codificación posicional 2-dimensional}
