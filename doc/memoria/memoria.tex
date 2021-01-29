@@ -272,7 +272,6 @@ Las bases de datos para el problema son:
   \textsc{imlatex-170k} \cite{im2latex_170k}: contiene 65000 ejemplos, que se
   añaden a los 100000 de im2latex-100k.
 \end{itemize}
-% TODO: revisar que (todas) las referencias están bien puestas.
 
 Una muestra de \textsc{imlatex-170k} se puede ver en la figura
 \ref{fig:muestras-1}.
@@ -752,10 +751,6 @@ los resultados obtenidos:
 	\centering
 	\includegraphics{fig/toy-3.pdf}
 \end{figure}
-<<<<<<< HEAD
-e
-Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo es practicamente el mismo, nos permitirá aumentar el tamaño del batch estudiado para Im2Latex, como veremos en el experimento \ref{exp:3a}.
-=======
 
 Vemos en la tabla como el modelo empeora en precisión en validación respecto al
 experimento original. Como ya explicamos en la sección \ref{feature:fast-att}
@@ -870,7 +865,8 @@ cara a proximos experimentos. Bastará con leer dicho JSON en vez de realizar de
 nuevo el preprocesamiento.
 
 Finalmente, ya que este preprocesamiento aumenta la precisión sin añadir tiempo de
-cómputo al modelo, merece la pena en todos los casos. Es por ello que a partir de
+cómputo al modelo, merece la pena en todos lo
+Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo ess casos. Es por ello que a partir de
 ahora todos los experimentos se realizarán sobre los datos sin ambigüedades.
 
 \subsubsection{Atención eficiente}
