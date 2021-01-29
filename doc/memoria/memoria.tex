@@ -293,11 +293,13 @@ a la anterior.
 \end{figure}
 
 
-\subsection{Base de datos sintética}
+\subsection{Base de datos sintética: Toy}
+\label{sec:toy}
 
 Lo primero que hemos hecho ha sido crear una base de datos similar a las que
 pretendemos tratar, en la que las fórmulas han sido generadas a partir de una
 gramática relativamente sencilla, que contiene una cantidad pequeña de símbolos.
+A esta base de datos la hemos denominado \textbf{Toy}.
 
 Hemos generado 50.000 ejemplos distintos. Los guiones Python que hemos escrito a
 tal efecto permiten cambiar la gramática y generar conjuntos de datos con
@@ -315,6 +317,7 @@ o hiperparámetros de forma menos costosa.
 
 
 \section{Modelo propuesto}
+\label{sec:model}
 
 El modelo que proponemos es el siguiente:
 
@@ -377,6 +380,7 @@ de atención en el codificador y en el decodificador.
 \end{figure}
 % \fi
 
+
 \section{Procesamiento de los datos}
 
 Para las imágenes, el procesamiento que realizamos es redimensionarlas a una
@@ -422,6 +426,7 @@ describen en la sección de experimentos.
 
 
 \subsection{Eliminación de ambigüedades}
+\label{feature:rem-amb}
 
 Como ya discutimos en la sección \ref{sec:datasets}, en este problema
 encontramos ambigüedad en la salida de los datos. Distintas expresiones $LaTeX$
@@ -496,6 +501,7 @@ pena porque sean lo suficientemente relevantes:
 \end{itemize}
 
 \subsection{Atención eficiente}
+\label{feature:fast-att}
 
 Uno de los principales escollos que hemos encontrado ya desde el trabajo
 preliminar en este proyecto es el enorme consumo de memoria del modelo
@@ -522,7 +528,7 @@ posicional de los elementos que recibe. Es por ello que se añade codificación
 posicional, para añadir artificialmente dicha información de la posición de cada
 palabra.
 
-% TODO: No estoy nada seguro de querer poner esta foto y essta explicación creo
+% TODO: No estoy nada seguro de querer poner esta foto y esta explicación creo
 % que anda un poco cogida con pinzas, una revisión técnica no le viene mal.
 
 \begin{figure}[H]
@@ -558,26 +564,124 @@ traducción de lenguaje a otro, y la utilizaremos en el último experimento.
 
 % Referencia: [tensor2tensor](https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu\_hook.py#L132).
 
+\section{Parámetros del modelo}
+\label{sec:params}
+
+% TODO: aqui explicamos los parámetros del modelo basico
 
 \section{Experimentos}
 
+Explicamos a continuación los experimentos realizados.
+
 \subsection{Experimentos sobre Toy}
 
-\subsubsection{Vanilla}
+En esta primera sección detallamos algunos de los experimentos más interesantes
+realizados sobre la base de datos Toy \ref{sec:toy}. Vamos a destacar 3: Uno
+inicial sobre el modelo sin alteraciones que servirá como base de referencia
+para los demás, y otros dos que prueban algunas de las modificaciones implementadas. 
+
+% TODO: hablar de como no dividimos para test, unicamente para validación
+
+\subsubsection{Experimento inicial sobre Toy}
+\label{exp:toy1}
+
+Para el primer experimento nos ceñimos al modelo propuesto \ref{sec:model} junto con
+los parámetros especificados \ref{sec:sec:params} sin ninguna modificación. Los resultados obtenidos han sido los siguientes: 
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión & Precisión en validación & Pérdida & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		CNN simple & 0.9201    & 0.5098                  & 0.2242  & 2.8680                & 1.27      
+	\end{tabular}
+\end{table}
+
+% TODO: insert fig here
+
+Obtenemos una precisión en entrenamiento del 92.01\% frente a 50.98\% en validación,
+produciéndose un tremendo sobreajuste sobre los datos de entrenamiento. En las gráficas
+vemos como 4 o 5 epochs eran suficientes para ajustar el modelo a los datos. A partir de
+ese punto, la precisión en validación baja ligeramente mientras que en entrenamiento
+continúa subiendo. De la misma forma, la pérdida acaba subiendo hacia conforme aumenta
+el número de epochs.
+
+El tiempo de ejecución completo ha sido de 1.27 horas. No es particularmente alto,
+pero si consideramos que aún no hemos añadido ningún extra al modelo, y que la bases
+de datos utilizada es la sintética, esto nos hace pensar que el tiempo de ejecuciones
+de los posteriores experimentos será notablemente alto.
+
+Cabe destacar que ese 50.98\% de precisión en validación nos indica que el modelo
+acierta exactamente el código \LaTeX{} esperado elemento a elemento, obviamente
+incluyendo orden, en la mitad de los casos. En la otra mitad, falla al menos en
+un elemento o el ordenamiento de los mismos.
+
+
 \subsubsection{ResNet}
+\label{exp:toy2}
+
+En este segundo experimento cambiamos la red convolucional utilizada para extraer
+las características de las imágenes por una ResNet. Mantenemos el resto de parámetros
+invariantes para comparar unicamente el resultado de ResNet. Veamos los resultados obtenidos:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión       & Precisión en validación & Pérdida         & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		CNN Simple & 0.9201          & 0.5098                  & 0.2242          & 2.8680                & 1.27       \\
+		ResNet     & \textbf{0.9340} & \textbf{0.5320}         & \textbf{0.1922} & \textbf{1.4217}       & 1.40      
+	\end{tabular}
+\end{table}
+
+% TODO: insert fig
+
+Vemos como el modelo mejora en todas las métricas estudiadas. Si bien el modelo
+con ResNet tarda un poco más en ajustarse a los datos, como se aprecia en la gráfica
+de precisión en validación, también se sobreajusta menos a los mismos - o al menos
+tarda más en hacerlo. A pesar de que la mejora en un 3\% de precisión no demasiado
+remarcable, si que nos indica cierta mejora así que nos incita a probar esta misma
+comparación en la base de datos Im2Latex, como se realiza en el experimento \ref{exp:3b}.
+
+En cuanto al tiempo, este aumenta ligeramente, lo que se traducirá en una posterior
+sobrecarga temporal en su aplicación sobre Im2Latex.
+
+
 \subsubsection{Atención Rápida}
+\label{exp:toy3}
+
+En este tercer y último experimento sobre Toy probamos la atención eficiente explicada en la sección \ref{feature:fast-att}. Volvemos a utilizar la red convolucional simple y mantenemos el mismo de parámetros. Veamos los resultados obtenidos:
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{llllll}
+		& Precisión       & Precisión en validación & Pérdida         & Pérdida en validación & Tiempo (h) \\ \cline{2-6} 
+		CNN Simple         & 0.9201          & 0.5098                  & 0.2242          & 2.8680                & 1.27       \\
+		ResNet             & 0.9340          & \textbf{0.5320}         & 0.1922          & \textbf{1.4217}       & 1.40       \\
+		Atención eficiente & \textbf{0.9411} & 0.4936                  & \textbf{0.1652} & 1.5576                & 1.29      
+	\end{tabular}
+\end{table}
+
+% TODO: insert fig
+
+Vemos en la tabla como el modelo empeora en precisiñón en validación respecto al experimento original. Como ya explicamos en la sección \ref{feature:fast-att} donde se explica la atención eficiente, el objetivo de ésta es reducir el consumo de memoria, uno de los principales cuellos de botella del modelo. Si bien esto no se percibe particularme ahora ya que el tiempo es practicamente el mismo, nos permitirá aumentar el tamaño del batch estudiado para Im2Latex, como veremos en el experimento \ref{exp:3a}.
 
 \subsection{Experimentos sobre Im2Latex}
 
-\subsubsection{Vanilla}
+\subsubsection{Experimento inicial}
+\label{exp:1}
+
+% TODO: Observación interesante: no sobreajustamos tanto y da mejores resultados que en toy
 
 \subsubsection{Eliminar ambigüedades}
+\label{exp:2}
 
 \subsubsection{Atención rápida}
+\label{exp:3a}
 
 \subsubsection{ResNet}
+\label{exp:3b}
 
 \subsubsection{Codificación positional 2-dimensional}
+\label{exp:3c}
 
 \subsubsection{Learning rate modificado}
 
